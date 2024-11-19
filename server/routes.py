@@ -4,8 +4,8 @@ from apscheduler.schedulers.background import BackgroundScheduler
 from flask_sqlalchemy import SQLAlchemy
 from sqlalchemy.exc import IntegrityError
 from datetime import datetime
-from models import Reading
-from extensions import db
+from server.models import Reading
+from server.extensions import db
 
 bp = Blueprint('api', __name__)
 

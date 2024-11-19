@@ -1,3 +1,4 @@
+alembic==1.14.0
 APScheduler==3.10.4
 blinker==1.9.0
 certifi==2024.8.30
@@ -5,11 +6,13 @@ charset-normalizer==3.4.0
 click==8.1.7
 Flask==3.1.0
 Flask-APScheduler==1.13.1
+Flask-Migrate==4.0.7
 Flask-SQLAlchemy==3.1.1
 idna==3.10
 importlib_metadata==8.5.0
 itsdangerous==2.2.0
 Jinja2==3.1.4
+Mako==1.3.6
 MarkupSafe==3.0.2
 psycopg2==2.9.10
 pydexcom==0.4.1

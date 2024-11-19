@@ -1,8 +1,8 @@
 from sqlalchemy.exc import IntegrityError
 from datetime import datetime
 from flask import current_app
-from extensions import db, dexcom
-from models import Reading
+from server.extensions import db, dexcom
+from server.models import Reading
 
 latest_reading = None
 gap_end_times = []

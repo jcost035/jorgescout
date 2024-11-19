@@ -1,8 +1,9 @@
 from flask import Flask
-from extensions import db, scheduler
-from config import Config
-from routes import register_routes
-from tasks import take_reading, fill_in_gaps
+from server.extensions import db, scheduler
+from server.config import Config
+from server.routes import register_routes
+from server.tasks import take_reading, fill_in_gaps
+from flask_migrate import Migrate
 
 def create_app():
     app = Flask(__name__)
@@ -11,6 +12,8 @@ def create_app():
     #init extensions
     db.init_app(app)
     scheduler.init_app(app)
+
+    migrate = Migrate(app, db)
 
     scheduler.add_job(func=take_reading, trigger="interval", minutes=5, id="take_reading")
     scheduler.add_job(func=fill_in_gaps, trigger="interval", hours=24, id="fill_in_gaps")
