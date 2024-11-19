@@ -15,6 +15,7 @@ scheduler = BackgroundScheduler()
 
 dexcom = Dexcom(username="jorge.costa5633@gmail.com", password="012106J-c")
 global latest_reading
+gap_end_times = []
 
 class Reading(db.Model):
     id: Mapped[int] = mapped_column(primary_key=True)
@@ -28,6 +29,7 @@ def take_reading():
     dexcom_reading = dexcom.get_current_glucose_reading()
 
     try:
+        check_for_gaps(dexcom_reading)
         latest_reading = Reading(value=dexcom_reading.value, time=dexcom_reading.datetime)
         db.session.add(latest_reading)
         db.session.commit()
@@ -37,12 +39,46 @@ def take_reading():
 
 scheduler.add_job(take_reading, "interval", minutes=5)
 
-def populate_old_readings(time=datetime.now()):
-    query = db.select(Reading).where(Reading.time < time and Reading.value is not None).order_by(Reading.time.desc()).limit(1)
+def populate_old_readings(gap_end_time=datetime.now()):
+    query = db.select(Reading).where(Reading.time < gap_end_time and Reading.value is not None).order_by(Reading.time.desc()).limit(1)
     gap_start_reading = db.session.execute(query)
 
-    #if gap > 288? readings then just fill in 288 readings prior to given time
-    #else get all readings between gap start time and given time
+    seconds_in_a_day = 24 * 60 * 60
+    difference = gap_end_time - gap_start_reading.time 
+
+    if difference.total_seconds() > seconds_in_a_day:
+        readings = dexcom.get_glucose_readings() #gets the last 24 hours of readings
+    else:
+        difference_in_minutes = round(difference.total_seconds() / 60)
+        readings = dexcom.get_glucose_readings(minutes=difference_in_minutes)
+    
+    if readings is not None and len(readings) > 0:
+            for reading in readings:
+                try:
+                    reading_entry = Reading(value=reading.value, time=reading.datetime)
+                    db.session.add(reading_entry)
+                    db.session.commit()
+                except IntegrityError as e:
+                    db.session.rollback()
+                    print(f"Error, failed to write record to db: {e.orig}")
+                except Exception as e:
+                    print(f"Error: {str(e)}")
+
+
+def check_for_gaps(new_latest_reading):
+    if latest_reading is not None:
+        difference = new_latest_reading.datetime - latest_reading.time
+        difference_in_minutes = difference.total_seconds() / 60
+        if difference_in_minutes > 15:
+            gap_end_times.add(new_latest_reading.time)
+
+def fill_in_gaps():
+    for gap_end_time in gap_end_times:
+        populate_old_readings(gap_end_time)
+    gap_end_times = []
+
+
+scheduler.add_job(fill_in_gaps, "interval", hours=24)
 
 
 @app.route('/')
@@ -51,10 +87,13 @@ def home():
     glucose_reading = dexcom.get_current_glucose_reading()
     history = dexcom.get_glucose_readings()
 
-    return jsonify({'message': glucose_reading.value})
+    return jsonify({
+        'latest_reading': history[0].value,
+         'time': history[0].datetime
+        })
 
 @app.route('/latestreading')
-def latest_reading():
+def latest_reading_route():
 
     if latest_reading is not None: #and the reading isn't stale?? 
         return jsonify({
