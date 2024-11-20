@@ -1,8 +1,9 @@
 from sqlalchemy.exc import IntegrityError
-from datetime import datetime
+from datetime import datetime, timezone, timedelta
 from flask import current_app
 from server.extensions import db, dexcom
 from server.models import Reading
+import pytz
 
 latest_reading = None
 gap_end_times = []
@@ -12,7 +13,7 @@ def take_reading():
 
     dexcom_reading = dexcom.get_current_glucose_reading()
     if dexcom_reading is None:
-        print("No reading!")  # Log this
+        print("No reading!")  #Log 
         return
 
     with app.app_context():
@@ -23,47 +24,54 @@ def take_reading():
             db.session.commit()
         except IntegrityError as e:
             db.session.rollback()
-            print(f"Error: {e.orig}")  # Log error
+            print(f"Error: {e.orig}")  #Log 
+
 
 def populate_old_readings(gap_end_time=datetime.now()):
+    from run import app
+
     query = db.select(Reading).where(
         Reading.time < gap_end_time, Reading.value is not None
     ).order_by(Reading.time.desc()).limit(1)
 
-    gap_start_reading = db.session.execute(query).scalar()
-    seconds_in_a_day = 24 * 60 * 60
-    difference = gap_end_time - gap_start_reading.time
+    with app.app_context():
+        gap_start_time = db.session.execute(query).scalar().time
 
-    difference_in_minutes = difference.total_seconds() / 60
-    if difference_in_minutes < 10:
+    gap_length = gap_end_time - gap_start_time
+
+    gap_length_minutes = gap_length.total_seconds() / 60
+    if gap_length_minutes < 10:
         return
 
-    readings = (
-        dexcom.get_glucose_readings()
-        if difference.total_seconds() > seconds_in_a_day
-        else dexcom.get_glucose_readings(minutes=round(difference_in_minutes))
-    )
+    readings = dexcom.get_glucose_readings()
 
-    if readings:
-        for reading in readings:
-            try:
-                reading_entry = Reading(value=reading.value, time=reading.datetime)
-                with current_app.app_context():
-                    db.session.add(reading_entry)
-                    db.session.commit()
-            except IntegrityError as e:
-                with current_app.app_context():
-                    db.session.rollback()
-                print(f"Error writing to db: {e.orig}")
-            except Exception as e:
-                print(f"Unexpected error: {str(e)}")
+    gap_end_time = gap_end_time.replace(tzinfo=timezone(timedelta(days=-1, seconds=68400)))
+    gap_start_time = gap_start_time.replace(tzinfo=timezone(timedelta(days=-1, seconds=68400)))
+
+    def date_range_filter(reading):
+        return gap_start_time <= reading.datetime <= gap_end_time
+        
+    filtered_readings = list(filter(date_range_filter, readings))
+
+    for reading in reversed(filtered_readings):
+        try:
+            reading_entry = Reading(value=reading.value, time=reading.datetime)
+            with app.app_context():
+                db.session.add(reading_entry)
+                db.session.commit()
+        except IntegrityError as e:
+            with app.app_context():
+                db.session.rollback()
+            print(f"Error writing to db: {e.orig}") #log
+        except Exception as e:
+            print(f"Unexpected error: {str(e)}") #log
 
 def check_for_gaps(new_latest_reading):
     global latest_reading
     if latest_reading is not None:
-        difference = new_latest_reading.datetime - latest_reading.time
-        difference_in_minutes = difference.total_seconds() / 60
-        if difference_in_minutes > 15:
+        gap_length = new_latest_reading.datetime - latest_reading.time
+        gap_length_minutes = gap_length.total_seconds() / 60
+        if gap_length_minutes > 15:
             gap_end_times.append(new_latest_reading.time)
 
 def fill_in_gaps():

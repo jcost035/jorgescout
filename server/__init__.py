@@ -13,7 +13,7 @@ def create_app():
     db.init_app(app)
     scheduler.init_app(app)
 
-    migrate = Migrate(app, db)
+    Migrate(app, db)
 
     scheduler.add_job(func=take_reading, trigger="interval", minutes=5, id="take_reading")
     scheduler.add_job(func=fill_in_gaps, trigger="interval", hours=24, id="fill_in_gaps")
