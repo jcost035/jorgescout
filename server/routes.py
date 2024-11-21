@@ -1,9 +1,5 @@
-from flask import Flask, jsonify, Blueprint
+from flask import jsonify, Blueprint
 from pydexcom import Dexcom
-from apscheduler.schedulers.background import BackgroundScheduler
-from flask_sqlalchemy import SQLAlchemy
-from sqlalchemy.exc import IntegrityError
-from datetime import datetime
 from server.models import Reading
 from server.extensions import db
 
@@ -32,7 +28,7 @@ def latest_reading_route():
     try:
         latest_reading = db.session.execute(db.select(Reading).order_by(Reading.time.desc).limit(1)).scalar_one_or_none()
     except Exception as e:
-        print(f"Database error: {str(e)}") #log
+        print(f"Database exception: {str(e)}") #log
         return jsonify({'error': 'There was an error retrieving the latest record'})
 
     if latest_reading is not None:
