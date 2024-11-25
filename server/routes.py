@@ -13,7 +13,8 @@ def home():
 
     return jsonify({
         'latest_reading': history[0].value,
-         'time': history[0].datetime
+         'time': history[0].datetime,
+         'trend_arrow': history[0].trend_arrow
         })
 
 @bp.route('/latestreading', methods=['GET'])

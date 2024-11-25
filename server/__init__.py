@@ -4,10 +4,13 @@ from server.config import Config
 from server.routes import register_routes
 from server.tasks import take_reading, fill_in_gaps
 from flask_migrate import Migrate
+from flask_cors import CORS 
 
 def create_app():
     app = Flask(__name__)
     app.config.from_object(Config)
+
+    CORS(app) #specify resources parameter in production
 
     db.init_app(app)
     scheduler.init_app(app)
@@ -15,7 +18,7 @@ def create_app():
     Migrate(app, db)
 
     scheduler.add_job(func=lambda:take_reading(app), trigger="interval", minutes=5, id="take_reading")
-    scheduler.add_job(func=lambda:fill_in_gaps(app), trigger="interval", minutes=24, id="fill_in_gaps")
+    #scheduler.add_job(func=lambda:fill_in_gaps(app), trigger="interval", minutes=24, id="fill_in_gaps")
 
     scheduler.start()
 

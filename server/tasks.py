@@ -10,17 +10,18 @@ gap_end_times = []
 def take_reading(app):
     try:
         dexcom_reading = dexcom.get_current_glucose_reading()
+
+        if dexcom_reading is None:
+            print("No reading!")  #Log 
+            return
+        
     except Exception as e:
         print(f"Exception: {str(e)}") #log
-
-    if dexcom_reading is None:
-        print("No reading!")  #Log 
-        return
 
     with app.app_context():
         try:
             check_for_gaps(app, Reading(value=dexcom_reading.value, time=dexcom_reading.datetime))
-            latest_reading = Reading(value=dexcom_reading.value, time=dexcom_reading.datetime)
+            latest_reading = Reading(value=dexcom_reading.value, time=dexcom_reading.datetime, trendArrow=dexcom_reading.trend_arrow)
             db.session.add(latest_reading)
             db.session.commit()
         except IntegrityError as e:
@@ -81,7 +82,7 @@ def check_for_gaps(app, new_latest_reading):
         gap_length_minutes = gap_length.total_seconds() / 60
         if gap_length_minutes > 15:
             gap_end_times.append(new_latest_reading.time)
-        # should i just call populate_old_readings(app, new_latest_reading.time) ? probably!
+            populate_old_readings(app, new_latest_reading.time)
 
 def fill_in_gaps(app):
     for gap_end_time in gap_end_times:
