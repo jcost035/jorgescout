@@ -1,8 +1,10 @@
 from sqlalchemy.exc import IntegrityError
+from sqlalchemy import func
 from datetime import datetime, timezone, timedelta
 from flask import current_app
 from server.extensions import db, dexcom
 from server.models import Reading
+from math import sqrt
 
 latest_reading = None
 gap_end_times = []
@@ -50,14 +52,14 @@ def populate_old_readings(app, gap_end_time=datetime.now()):
     readings = dexcom.get_glucose_readings()
 
     def date_range_filter(reading):
-        return gap_start_time <= reading.datetime <= gap_end_time
+        return gap_start_time < reading.datetime < gap_end_time
         
     filtered_readings = list(filter(date_range_filter, readings))
 
     for reading in reversed(filtered_readings):
         with app.app_context():
             try:
-                reading_entry = Reading(value=reading.value, time=reading.datetime)
+                reading_entry = Reading(value=reading.value, time=reading.datetime, trendArrow=reading.trend_arrow)
                 db.session.add(reading_entry)
                 db.session.commit()
             except IntegrityError as e:
@@ -88,3 +90,65 @@ def fill_in_gaps(app):
     for gap_end_time in gap_end_times:
         populate_old_readings(app, gap_end_time)
     gap_end_times.clear()
+
+def get_time_in_range():
+    with current_app.app_context():
+        query = db.select(func.count()).select_from(Reading)
+        reading_count = db.session.execute(query).scalar_one() 
+    
+        high = db.session.execute(db.select(func.count()).where(Reading.value > 180)).scalar_one()
+        in_range = db.session.execute(db.select(func.count()).where((50 < Reading.value) & (Reading.value < 180))).scalar_one()
+        low = db.session.execute(db.select(func.count()).where(Reading.value < 50)).scalar_one()
+    
+    return {
+        'in-range': round(in_range / reading_count * 100),
+        'high': round(high / reading_count * 100),
+        'low': round(low / reading_count * 100)
+    }
+
+def get_average_glucose():
+    with current_app.app_context():
+        query = db.select(func.count()).select_from(Reading)
+        reading_count = db.session.execute(query).scalar_one() 
+
+        query = db.select(Reading).order_by(Reading.time.asc()).limit(1)
+        start_reading = db.session.execute(query).scalar_one_or_none()
+
+        reading_sum = db.session.execute(db.select(func.sum(Reading.value))).scalar_one()
+    
+    return {
+        'average glucose': round(reading_sum / reading_count, 2),
+        'range-start-date': str(start_reading.time)
+        }
+
+def get_a1c():
+    average_glucose = get_average_glucose()["average glucose"]
+
+    a1c = (average_glucose + 46.7) / 28.7
+
+    return round(a1c, 1)
+
+def get_standard_deviation():
+    average = get_average_glucose()["average glucose"]
+
+    query = db.select(func.count()).select_from(Reading)
+    reading_count = db.session.execute(query).scalar_one() 
+
+    #with current_app.app_context():
+    query = db.select(Reading)
+    readings = db.session.execute(query).scalars()
+
+    square_sum = 0
+    for reading in readings:
+        difference = reading.value - average
+        square = difference * difference
+        square_sum += square
+    
+    variance = square_sum / reading_count
+
+    standard_deviation = sqrt(variance)
+
+    return round(standard_deviation)
+        
+
+
