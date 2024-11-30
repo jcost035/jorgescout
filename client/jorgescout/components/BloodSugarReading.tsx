@@ -6,22 +6,28 @@ import { Text, View } from './Themed';
 
 
 export default function BloodSugarReading() {
-    const [reading, setReading] = useState<string>("Loading...")
-    const readingColor = reading == "Loading..." || reading == "Error fetching reading" ? 'black' : Number(reading) < 50 ? 'red' : Number(reading) > 180 ? 'yellow' : 'lawngreen';
+    const [reading, setReading] = useState<string>(":/")
+    const [readingColor, setReadingColor] = useState<string>("black")
+    //const readingColor = reading == "Loading..." || reading == "Error fetching reading" ? 'black' : Number(reading) < 70 ? 'red' : Number(reading) > 180 ? 'yellow' : 'lawngreen';
+    
 
     useEffect(() => {
         const fetchData = async () => {
             try {
                 const data = await getReading();
-                setReading(data);
+                setReading(data.value + " " + data.trendArrow);
+
+                const color = data.value == "Loading..." || data.value == "Error fetching reading" ? 'black' : Number(data.value) < 70 ? 'red' : Number(data.value) > 180 ? 'yellow' : 'lawngreen';
+                setReadingColor(color)
             }
             catch(error) {
                 console.error("Error: ", error);
                 setReading("Error fetching reading");
             }
         };
-
+         
         fetchData();
+        
 
         const interval = setInterval(fetchData, 300000);
 

@@ -3,6 +3,7 @@ from pydexcom import Dexcom
 from server.models import Reading
 from server.extensions import db
 from tasks import get_time_in_range, get_average_glucose, get_a1c, get_standard_deviation
+from datetime import datetime
 
 bp = Blueprint('api', __name__)
 
@@ -58,6 +59,15 @@ def test_route():
         'a1c' : get_a1c(), 
         'standard deviation': get_standard_deviation()
     })
+
+@bp.route('/testhigh', methods=['GET'])
+def test_high():
+    return jsonify({
+            'latest_reading': 190,
+            'time': datetime.now(),
+            'trend_arrow': ''
+        })
+
     
 def register_routes(app):
     app.register_blueprint(bp)

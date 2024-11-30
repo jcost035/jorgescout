@@ -19,6 +19,7 @@ def take_reading(app):
         
     except Exception as e:
         print(f"Exception: {str(e)}") #log
+        return
 
     with app.app_context():
         try:
