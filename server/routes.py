@@ -49,6 +49,22 @@ def latest_reading_route():
     else:
         return jsonify({'error': 'There was an error retrieving the latest record'})
     
+@bp.route('/history/<int:reading_count>', methods=['GET'])
+def history_route(reading_count=10):
+    dexcom = Dexcom(username="jorge.costa5633@gmail.com", password="012106J-c")
+    glucose_reading = dexcom.get_current_glucose_reading()
+    history = dexcom.get_glucose_readings(max_count=reading_count)
+
+    def to_json(reading):
+        return reading.json
+
+    history_list = list(map(to_json, history))
+
+    return jsonify({
+        'history': history_list
+        })
+
+    
 @bp.route('/test', methods=['GET'])
 def test_route():
     tir = get_time_in_range()
