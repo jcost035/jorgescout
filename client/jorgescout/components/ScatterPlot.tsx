@@ -47,17 +47,7 @@ export default function ScatterPlot() {
       return () => {clearInterval(interval)};
   }, []); // Empty dependency array ensures this runs only once when the component mounts
 
-  const colorMap = [
-    '#851b48',
-    '#96324d',
-    '#a64851',
-    '#b75f56',
-    '#c8765a',
-    '#d88c5f',
-];
-
   return (
- 
     <View style={{ height: 250, width:350 }}>
         <CartesianChart 
           data={points} 
@@ -71,23 +61,24 @@ export default function ScatterPlot() {
             //👇 pass a PointsArray to the Scatter component
             let high_points = points.y.filter((point: {yValue: number}) => point.yValue >= 50);
             let low_points = points.y.filter((point: {yValue: number}) => point.yValue < 70)
-            return <>
-
-              <Scatter 
-                points={high_points}
-                shape="circle"
-                style="fill"
-                color="black"
-                radius={2}
-              />
-              <Scatter 
-                points={low_points}
-                shape="circle"
-                style="fill"
-                color="red"
-                radius={2}
-              />
-            </>
+            return (
+              <>
+                <Scatter 
+                  points={high_points}
+                  shape="circle"
+                  style="fill"
+                  color="black"
+                  radius={2}
+                />
+                <Scatter 
+                  points={low_points}
+                  shape="circle"
+                  style="fill"
+                  color="red"
+                  radius={2}
+                />
+              </>
+            )
               
           }}
         </CartesianChart>

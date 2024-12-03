@@ -3,6 +3,8 @@ import { StyleSheet, Dimensions } from 'react-native';
 import { getReading } from '@/scripts/scripts.ts';
 import { Text, View } from './Themed';
 import { GestureHandlerRootView, ScrollView } from 'react-native-gesture-handler';
+import A1cTile from '@/components/A1cTile';
+import TimeInRange from '@/components/TimeInRange';
 
 
 
@@ -15,18 +17,47 @@ export default function DataScroll() {
     return (
         <GestureHandlerRootView>
             <ScrollView>
-                <View style={{height: 1000, backgroundColor: "red", width: windowWidth, flexDirection: "column"}}>
-                    <View style={{ flexDirection: "row", height: (windowWidth / 2)}}>
-                        <View style={{height: (windowWidth / 2), width: windowWidth/2, backgroundColor: "green"}}></View>
-                        <View style={{height: (windowWidth / 2), width: windowWidth/2, backgroundColor: "blue"}}></View>
-                    </View>
+                <View style={{ width: windowWidth, flexDirection: "column"}}>
+                    <View style={styles.horizontalSeparator} />
                     <View style={{ flexDirection: "row"}}>
-                        <View style={{height: (windowWidth / 2), width: windowWidth/2, backgroundColor: "orange"}}></View>
-                        <View style={{height: (windowWidth / 2), width: windowWidth/2, backgroundColor: "yellow"}}></View>
+                        <A1cTile/>
+                        <View style={styles.verticalSeparator} />
+                        <TimeInRange/>
+                        <View style={styles.verticalSeparator} />
+                        <View style={{height: (windowWidth / 3), width: windowWidth/3, backgroundColor: ""}}></View>
                     </View>
+                    <View style={styles.horizontalSeparator} />
+                    <View style={{ flexDirection: "row"}}>
+                        <View style={{height: (windowWidth/ 3), width: windowWidth, backgroundColor: ""}}></View>
+                    </View>
+                    <View style={styles.horizontalSeparator} />
+                    <View style={{ flexDirection: "row"}}>
+                        <View style={{height: (windowWidth / 3), width: windowWidth/3, backgroundColor: ""}}></View>
+                        <View style={styles.verticalSeparator} />
+                        <View style={{height: (windowWidth / 3), width: windowWidth/3, backgroundColor: ""}}></View>
+                        <View style={styles.verticalSeparator} />
+                        <View style={{height: (windowWidth / 3), width: windowWidth/3, backgroundColor: ""}}></View>
+                    </View>
+                    <View style={styles.horizontalSeparator} />
+
                 </View>
             </ScrollView>
         </GestureHandlerRootView>
     );
     
 }
+
+const styles = StyleSheet.create(
+    {
+        horizontalSeparator: {
+            backgroundColor: "black",
+            height: 1,
+            width: '100%',
+        },
+        verticalSeparator: {
+            backgroundColor: "black",
+            width: 1,
+            height: '100%',
+        }
+    }
+)

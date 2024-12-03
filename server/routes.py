@@ -65,12 +65,10 @@ def history_route(reading_count=10):
         })
 
     
-@bp.route('/test', methods=['GET'])
-def test_route():
-    tir = get_time_in_range()
-
+@bp.route('/stats', methods=['GET'])
+def stats():
     return jsonify({
-        'time in range': tir, 
+        'time in range': get_time_in_range(), 
         'average': get_average_glucose(), 
         'a1c' : get_a1c(), 
         'standard deviation': get_standard_deviation()
