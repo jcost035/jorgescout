@@ -31,7 +31,12 @@ export default function ScatterPlot() {
   
               let temp_points: Array<object> = [];
               let i = 49;
-              history_data.history.forEach((reading: { Value: number, Time: string }) => {temp_points.push({x: i, y:reading.Value}); i--;});
+              history_data.history.forEach(
+                (reading: { Value: number, Time: string }) => {
+                  temp_points.push({x: i, y:reading.Value}); 
+                  i--;
+                }
+              );
               
               setPoints(temp_points);
           }

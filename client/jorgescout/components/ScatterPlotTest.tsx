@@ -105,7 +105,7 @@ const ScatterPlot = () => {
                     const y = yScale(tick)!;
                     return (
                     <G key={index} translateX={-5} translateY={y}>
-                        <Line x1={5} y1={0} x2={chartWidth} y2={0} stroke="#e3e3e3" />
+                        <Line x1={5} y1={0} x2={chartWidth + 5} y2={0} stroke="#e3e3e3" />
                         <Text
                         x={-10}
                         y={4}
