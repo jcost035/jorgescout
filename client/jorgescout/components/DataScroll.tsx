@@ -4,7 +4,9 @@ import { getReading } from '@/scripts/scripts.ts';
 import { Text, View } from './Themed';
 import { GestureHandlerRootView, ScrollView } from 'react-native-gesture-handler';
 import A1cTile from '@/components/A1cTile';
-import TimeInRange from '@/components/TimeInRange';
+import TimeInRangeChart from '@/components/TimeInRangeChart';
+import SegmentChart from '@/components/SegmentChart';
+import AverageGlucoseTile from './AverageGlucoseTile';
 
 
 
@@ -12,6 +14,7 @@ export default function DataScroll() {
     
     
     const windowWidth = Dimensions.get('screen').width;
+    const sideLength = windowWidth / 3;
     
 
     return (
@@ -22,21 +25,21 @@ export default function DataScroll() {
                     <View style={{ flexDirection: "row"}}>
                         <A1cTile/>
                         <View style={styles.verticalSeparator} />
-                        <TimeInRange/>
+                        <TimeInRangeChart/>
                         <View style={styles.verticalSeparator} />
-                        <View style={{height: (windowWidth / 3), width: windowWidth/3, backgroundColor: ""}}></View>
+                        <AverageGlucoseTile/>
                     </View>
                     <View style={styles.horizontalSeparator} />
                     <View style={{ flexDirection: "row"}}>
-                        <View style={{height: (windowWidth/ 3), width: windowWidth, backgroundColor: ""}}></View>
+                        <SegmentChart/>
                     </View>
                     <View style={styles.horizontalSeparator} />
                     <View style={{ flexDirection: "row"}}>
-                        <View style={{height: (windowWidth / 3), width: windowWidth/3, backgroundColor: ""}}></View>
+                        <View style={{height: sideLength, width: sideLength, backgroundColor: ""}}></View>
                         <View style={styles.verticalSeparator} />
-                        <View style={{height: (windowWidth / 3), width: windowWidth/3, backgroundColor: ""}}></View>
+                        <View style={{height: sideLength, width: sideLength, backgroundColor: ""}}></View>
                         <View style={styles.verticalSeparator} />
-                        <View style={{height: (windowWidth / 3), width: windowWidth/3, backgroundColor: ""}}></View>
+                        <View style={{height: sideLength, width: sideLength, backgroundColor: ""}}></View>
                     </View>
                     <View style={styles.horizontalSeparator} />
 
@@ -50,12 +53,12 @@ export default function DataScroll() {
 const styles = StyleSheet.create(
     {
         horizontalSeparator: {
-            backgroundColor: "black",
+            backgroundColor: "#dfdfdf",
             height: 1,
             width: '100%',
         },
         verticalSeparator: {
-            backgroundColor: "black",
+            backgroundColor: "#dfdfdf",
             width: 1,
             height: '100%',
         }

@@ -118,7 +118,7 @@ def get_average_glucose():
         reading_sum = db.session.execute(db.select(func.sum(Reading.value))).scalar_one()
     
     return {
-        'average glucose': round(reading_sum / reading_count, 2),
+        'average glucose': round(reading_sum / reading_count, 0),
         'range-start-date': str(start_reading.time)
         }
 

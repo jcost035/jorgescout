@@ -6,9 +6,8 @@ import { Text, View } from './Themed';
 
 
 export default function BloodSugarReading() {
-    const [reading, setReading] = useState<string>(":/")
-    const [readingColor, setReadingColor] = useState<string>("black")
-    //const readingColor = reading == "Loading..." || reading == "Error fetching reading" ? 'black' : Number(reading) < 70 ? 'red' : Number(reading) > 180 ? 'yellow' : 'lawngreen';
+    const [reading, setReading] = useState<string>(":/");
+    const [readingColor, setReadingColor] = useState<string>("black");
     
 
     useEffect(() => {
@@ -17,7 +16,7 @@ export default function BloodSugarReading() {
                 const data = await getReading();
                 setReading(data.value + " " + data.trendArrow);
 
-                const color = data.value == "Loading..." || data.value == "Error fetching reading" ? 'black' : Number(data.value) < 70 ? 'red' : Number(data.value) > 180 ? 'yellow' : 'lawngreen';
+                const color = data.value == "Loading..." || data.value == "Error fetching reading" ? 'black' : Number(data.value) < 70 ? 'red' : Number(data.value) > 180 ? 'orange' : 'lawngreen';
                 setReadingColor(color)
             }
             catch(error) {

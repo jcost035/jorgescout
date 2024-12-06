@@ -2,7 +2,7 @@ import DeviceInfo from 'react-native-device-info';
 // import { QueryClient, QueryClientProvider, useQuery } from '@tanstack/react-query';
 
 // const queryClient = new QueryClient();
-let ip = '127.0.0.1'
+let ip = '192.168.0.130'
 
 export async function getReading() {
     try {
@@ -33,8 +33,6 @@ export async function getHistory(readingCount: number) {
   } 
   catch (error) {
     console.error('Error fetching data:', error);
-    return {value: 'Error fetching reading', trendArrow: ''};
-
   }
 
 }

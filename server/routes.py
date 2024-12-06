@@ -4,6 +4,7 @@ from server.models import Reading
 from server.extensions import db
 from tasks import get_time_in_range, get_average_glucose, get_a1c, get_standard_deviation
 from datetime import datetime
+import time
 
 bp = Blueprint('api', __name__)
 
@@ -57,12 +58,25 @@ def history_route(reading_count=10):
 
     def to_json(reading):
         return reading.json
+    
+    def create_js_date_string(dt):
+        return dt.strftime('%Y-%m-%dT%H:%M:%S.%fZ')
+    
+    def date_string_conversion(reading):
+        time = datetime.utcfromtimestamp(int(reading["ST"][5:-4]))
+
+        reading["TimeString"] = create_js_date_string(time)
+        reading["Hour"] = time.hour
+        reading["Minute"] = time.minute
+
 
     history_list = list(map(to_json, history))
 
+    histroy_list = list(map(date_string_conversion, history_list))
+
     return jsonify({
         'history': history_list
-        })
+    })
 
     
 @bp.route('/stats', methods=['GET'])
