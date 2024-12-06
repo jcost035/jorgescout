@@ -1,39 +1,114 @@
-import React from 'react';
-import { View, Dimensions } from 'react-native';
-import { Pie, PolarChart } from "victory-native";
+import React, {useEffect, useState} from 'react';
+import { Text, View, StyleSheet, Dimensions } from 'react-native';
+import Svg, { Path, G, Text as SvgText } from 'react-native-svg';
+import { pie, arc, PieArcDatum } from 'd3-shape';
+import { scaleOrdinal } from 'd3-scale';
+import { getStats } from '@/scripts/scripts';
+import { test } from 'vitest';
 
 const screenWidth = Dimensions.get('screen').width;
+const sideLength = screenWidth / 3;
 
-export default function TimeInRangeChart() {
-    
-    const data = [
-        {
-            value: 86,
-            color: "green",
-            label: `in range`,
-        },
-        {
-            value: 9,
-            color: "yellow",
-            label: `in range`,
-        },
-        {
-            value: 5,
-            color: "red",
-            label: `in range`,
-        },
-    ]
-
-    return (
-      <>
-        <PolarChart
-          data={data} // 👈 specify your data
-          labelKey="label" // 👈 specify data key for labels
-          valueKey="value" // 👈 specify data key for values
-          colorKey="color" // 👈 specify data key for color
-          >
-          <Pie.Chart innerRadius="55%" />
-        </PolarChart>
-      </>
-      );
+// Define the data type for pie chart segments
+interface PieData {
+  label: string;
+  value: number;
 }
+
+// Props for the PieChart component
+interface PieChartProps {
+  width?: number;
+  height?: number;
+}
+
+const testData: PieData[] = [
+  { label: '--', value: 0 },
+  { label: '--', value: 0 },
+  { label: '--', value: 0 },
+];
+
+const colorPalette = [
+  'orange', 'red', 'green', '#d62728', '#9467bd',
+  '#8c564b', '#e377c2', '#7f7f7f', '#bcbd22', '#17becf',
+];
+
+
+const PieChart: React.FC<PieChartProps> = ({ width = screenWidth / 3 - 40, height = screenWidth / 3 - 40 }) => {
+  const [data, setData] = useState<PieData[]>(testData);
+
+  useEffect(() => {
+    const fetchData = async () => {
+
+      const responseData = await getStats();
+  
+      const newData: PieData[] = [
+        { label: 'High', value: responseData["time in range"].high },
+        { label: 'Low', value: responseData["time in range"].low },
+        { label: 'In Range', value: responseData["time in range"]["in-range"]}
+      ];
+
+      setData(newData);
+    }
+
+    fetchData();
+
+  }, []);
+
+  const radius = Math.min(width, height) / 2 - 10;
+  const colors = scaleOrdinal(colorPalette);
+
+  // Generate pie slices
+  const pieGenerator = pie<PieData>()
+    .value((d) => d.value)
+    .sort(null);
+
+  const arcGenerator = arc<any>()
+    .innerRadius(20) // inner radius creates hollow center
+    .outerRadius(radius);
+
+  const pieData = pieGenerator(data);
+
+  return (
+    <View style={styles.container}>
+      <Text style={{fontSize: 15, paddingTop: 5}}>Time in Range</Text>
+      <Svg width={width} height={height}>
+        <G x={width / 2} y={height / 2}>
+          {pieData.map((slice: PieArcDatum<PieData>, index: number) => (
+            <G key={index}>
+              {/* Render the pie slice */}
+              <Path
+                d={arcGenerator(slice) as string}
+                fill={colors(index.toString()) as string}
+              />
+              {/* Add text label */}
+              {/* <SvgText
+                x={arcGenerator.centroid(slice)[0]}
+                y={(arcGenerator.centroid(slice)[1])}
+                fontSize={8}
+                fill="black"
+                textAnchor="middle"
+              >
+                {slice.data.value} %
+              </SvgText> */}
+            </G>
+          ))}
+        </G>
+      </Svg>
+      <View style={{flexDirection: "row", paddingBottom: 1}}>
+        <Text style={{color: "red"}}>{data[1].value + "% " }</Text><Text style={{color: "green"}}>{ data[2].value + "% " }</Text><Text style={{color: "orange"}}>{ data[0].value + "%" }</Text>
+      </View>
+    </View>
+  );
+};
+
+const styles = StyleSheet.create({
+  container: {
+    justifyContent: 'center',
+    alignItems: 'center',
+    padding: 1,
+    width: sideLength,
+    height: sideLength
+  },
+});
+
+export default PieChart;

@@ -3,7 +3,7 @@ import { View, Text } from './Themed';
 import { getStats } from '@/scripts/scripts.ts';
 import Dimensions, { StyleSheet } from 'react-native';
 
-const windowWidth = Dimensions.Dimensions.get('screen').width;
+const sideLength = Dimensions.Dimensions.get('screen').width / 3;
 
 export default function A1cTile() {
     const [a1c, setA1c] = useState<string>("--");
@@ -34,8 +34,8 @@ export default function A1cTile() {
 
 const styles = StyleSheet.create({
     tile: {
-        height: windowWidth / 3, 
-        width: windowWidth / 3, 
+        height: sideLength, 
+        width: sideLength, 
         justifyContent: "center",
         alignItems: "center",
         backgroundColor: "",
