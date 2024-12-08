@@ -1,9 +1,9 @@
 import React, { useEffect, useState } from 'react';
 import { View, Text } from './Themed';
 import { getStats } from '@/scripts/scripts.ts';
-import Dimensions, { StyleSheet } from 'react-native';
+import { Dimensions, StyleSheet } from 'react-native';
 
-const sideLength = Dimensions.Dimensions.get('screen').width / 3;
+const sideLength = Dimensions.get('screen').width / 3;
 
 export default function A1cTile() {
     const [a1c, setA1c] = useState<string>("--");

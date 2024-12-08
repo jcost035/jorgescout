@@ -11,7 +11,8 @@ interface DataPoint {
   y: number;
 }
 
-const CHART_HEIGHT = 250;
+const DEFAULT_YAXIS = 250;
+const FIVE_MINUTES = 5*60000;
 
 const ScatterPlot = () => {
 
@@ -22,23 +23,30 @@ const ScatterPlot = () => {
             const response = await getHistory(50);
 
             const history_data:DataPoint[] = [];
-            response.history.map((item:{ TimeString: string, Value: number}) => history_data.push({x: new Date(item.TimeString), y: item.Value}));
 
-            console.log(history_data)
-            console.log("hi")
+            const firstTime = new Date(response.history[49].TimeString);
+            const startTime = new Date(firstTime.getTime() - FIVE_MINUTES);
+            history_data.push({x:startTime, y: -1000});
+            
+            response.history.map((item:{ TimeString: string, Value: number}) => history_data.push({x: new Date(item.TimeString), y: item.Value}));
+            
+            const lastTime = new Date(response.history[0].TimeString);
+            const endTime = new Date(lastTime.getTime() + FIVE_MINUTES);
+            history_data.push({x:endTime, y: -1000});
 
             setData(history_data);
-
         }
 
         fetchData();
         
         const interval = setInterval(fetchData, 300000);
 
+        return () => {clearInterval(interval)};
+
     }, []);
 
     // Dimensions and margins
-    const width = 350;
+    const width = 375;
     const height = 250;
     const margin = { top: 20, right: 20, bottom: 40, left: 40 };
 
@@ -48,7 +56,6 @@ const ScatterPlot = () => {
 
     // Define scales
     const xExtent = d3.extent(data, (d) => d.x) as [Date, Date];
-    console.log(xExtent)
     const xDomain: [Date, Date] = [
         xExtent[0],
         xExtent[1],
@@ -59,13 +66,17 @@ const ScatterPlot = () => {
         .range([0, chartWidth]);
 
     const yExtent = d3.extent(data, (d) => d.y) as [number, number];
+    const yAxisHeight = yExtent[1] > 250 ? yExtent[1] : DEFAULT_YAXIS;
     const yScale = d3
         .scaleLinear()
-        .domain([0, CHART_HEIGHT])
+        .domain([0, yAxisHeight])
         .range([chartHeight, 0]);
 
     // Generate ticks
     const tickValues = d3.timeHour.every(1).range(xDomain[0], xDomain[1]);
+
+    const RANGE_FLOOR = 70
+    const RANGE_CEILING = 180
 
     return (
         <View>
@@ -98,6 +109,9 @@ const ScatterPlot = () => {
                     );
                 })}
 
+                <Line x1={0} y1={yScale(RANGE_CEILING)} x2={chartWidth} y2={yScale(RANGE_CEILING)} stroke="orange"/>
+                <Line x1={0} y1={yScale(RANGE_FLOOR)} x2={chartWidth} y2={yScale(RANGE_FLOOR)} stroke="red"/>
+
                 {/* Y-Axis */}
                 <Line x1={0} y1={0} x2={0} y2={chartHeight} stroke="#e3e3e3" />
                 <Line x1={chartWidth} y1={0} x2={chartWidth} y2={chartHeight} stroke="#e3e3e3" />
@@ -128,8 +142,8 @@ const ScatterPlot = () => {
                         key={index}
                         cx={cx}
                         cy={cy}
-                        r={2}
-                        fill="black"
+                        r={point.y < 0 ? 0 : 2.1}
+                        fill={point.y < 70 ? "red" : point.y > 180 ? "#FF8C00" : "black" }
                     />
                     );
                 })}
@@ -151,5 +165,5 @@ const ScatterPlot = () => {
         { x: new Date("2024-12-04T12:12:00"), y: 30 },
     ];
 
-    return <ScatterPlot />;
+    return <ScatterPlot/>;
 }

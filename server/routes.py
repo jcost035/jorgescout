@@ -1,10 +1,12 @@
-from flask import jsonify, Blueprint, current_app
+from flask import jsonify, Blueprint, current_app, Response
 from pydexcom import Dexcom
-from server.models import Reading
+from server.models import Reading, dailyTimeInRange
 from server.extensions import db
 from tasks import get_time_in_range, get_average_glucose, get_a1c, get_standard_deviation
 from datetime import datetime
 import time
+import json
+
 
 bp = Blueprint('api', __name__)
 
@@ -96,7 +98,19 @@ def test_high():
             'trend_arrow': ''
         })
 
+@bp.route('/getdailytir/<int:tir_count>', methods=['GET'])
+def get_daily_tir(tir_count=30):
+    query = db.select(dailyTimeInRange).order_by(dailyTimeInRange.id.desc()).limit(tir_count)
+    tir_values = db.session.execute(query).scalars()
+    
+    def to_json(tir):
+        return {'timeInRange':tir.timeInRange, 'high': tir.timeHigh, 'low': tir.timeLow, 'date': tir.date}
+
+    tir_list = list(map(to_json, tir_values))
+
+    return jsonify(tir_list)
     
 def register_routes(app):
     app.register_blueprint(bp)
+
 

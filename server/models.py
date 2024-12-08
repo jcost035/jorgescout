@@ -7,3 +7,11 @@ class Reading(db.Model):
     value: Mapped[int]
     time: Mapped[datetime] = mapped_column(unique=True)
     trendArrow: Mapped[str] = mapped_column(nullable=True)
+
+class dailyTimeInRange(db.Model):
+    id: Mapped[int] = mapped_column(primary_key=True)
+    timeInRange: Mapped[int]
+    date: Mapped[datetime] = mapped_column(unique=True)
+    date_recorded: Mapped[datetime] = mapped_column(unique=True) #please make this mf camel case!!!
+    timeHigh: Mapped[int]
+    timeLow: Mapped[int]

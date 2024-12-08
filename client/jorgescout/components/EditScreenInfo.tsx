@@ -16,10 +16,10 @@ export default function EditScreenInfo({ path }: { path: string }) {
     const fetchData = async () => {
       try {
         const data = await getReading(); // Resolve the Promise
-        setReading(data); // Update the state with the resolved data
+        setReading(data.value); // Update the state with the resolved data
       } catch (error) {
         console.error('Error fetching reading:', error);
-        setReading('Error fetching reading'); // Handle errors gracefully
+        setReading('Error'); // Handle errors gracefully
       }
     };
 

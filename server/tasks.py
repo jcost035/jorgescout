@@ -3,7 +3,7 @@ from sqlalchemy import func
 from datetime import datetime, timezone, timedelta
 from flask import current_app
 from server.extensions import db, dexcom
-from server.models import Reading
+from server.models import Reading, dailyTimeInRange
 from math import sqrt
 
 latest_reading = None
@@ -92,20 +92,63 @@ def fill_in_gaps(app):
         populate_old_readings(app, gap_end_time)
     gap_end_times.clear()
 
-def get_time_in_range():
+def get_time_in_range(start_date=None, end_date=datetime.now()):
     with current_app.app_context():
-        query = db.select(func.count()).select_from(Reading)
-        reading_count = db.session.execute(query).scalar_one() 
+        if start_date is None:
+            query = db.select(func.count()).select_from(Reading)
+        else:
+            query = db.select(func.count()).select_from(Reading).where((func.date(Reading.time) >= start_date.date()) & (func.date(Reading.time) <= end_date.date()))
+        reading_count = db.session.execute(query).scalar_one_or_none() 
     
-        high = db.session.execute(db.select(func.count()).where(Reading.value > 180)).scalar_one()
-        in_range = db.session.execute(db.select(func.count()).where((50 < Reading.value) & (Reading.value < 180))).scalar_one()
-        low = db.session.execute(db.select(func.count()).where(Reading.value < 50)).scalar_one()
+        if reading_count > 0:
+            if start_date is None:
+                high = db.session.execute(db.select(func.count()).where(Reading.value > 180)).scalar_one()
+                in_range = db.session.execute(db.select(func.count()).where((50 < Reading.value) & (Reading.value < 180))).scalar_one()
+                low = db.session.execute(db.select(func.count()).where(Reading.value < 50)).scalar_one()
+            else:
+                high = db.session.execute(db.select(func.count()).where((Reading.value > 180) & (func.date(Reading.time) >= start_date.date()) & (func.date(Reading.time) <= end_date.date()))).scalar_one()
+                in_range = db.session.execute(db.select(func.count()).where((50 < Reading.value) & (Reading.value < 180) & (func.date(Reading.time) >= start_date.date()) & (func.date(Reading.time) <= end_date.date()))).scalar_one()
+                low = db.session.execute(db.select(func.count()).where((Reading.value < 50) & (func.date(Reading.time) >= start_date.date()) & (func.date(Reading.time) <= end_date.date()))).scalar_one()
+
+
     
-    return {
-        'in-range': round(in_range / reading_count * 100),
-        'high': round(high / reading_count * 100),
-        'low': round(low / reading_count * 100)
-    }
+            return {
+                'in-range': round(in_range / reading_count * 100),
+                'high': round(high / reading_count * 100),
+                'low': round(low / reading_count * 100)
+            }
+
+def populate_daily_time_in_range(app):
+
+    with app.app_context():
+        query = db.select(dailyTimeInRange).order_by(dailyTimeInRange.date.asc()).limit(1)
+        last_tir_recorded = db.session.execute(query).scalar_one_or_none()
+
+        current_date = last_tir_recorded.date if (last_tir_recorded is not None)  else datetime.now()
+
+        if last_tir_recorded is not None:
+            current_date = last_tir_recorded.date
+        else:
+            query = db.select(func.min(Reading.time)).limit(1)
+            earliest_reading = db.session.execute(query).scalar_one()
+            current_date = earliest_reading
+
+        while(current_date.date() < datetime.now().date()):
+            tir =  get_time_in_range(current_date,current_date)
+
+            daily_tir = dailyTimeInRange(timeInRange=tir['in-range'], timeHigh=tir['high'], timeLow=tir['low'], date=current_date, date_recorded=datetime.now())
+            
+            db.session.add(daily_tir) 
+
+            current_date += timedelta(days=1)
+
+        try:
+                db.session.commit()
+        except IntegrityError as e:
+            db.session.rollback()
+            print(f"Exception: {e.orig}")  #Log 
+
+
 
 def get_average_glucose():
     with current_app.app_context():
