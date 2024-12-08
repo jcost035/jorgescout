@@ -138,17 +138,14 @@ def populate_daily_time_in_range(app):
 
             daily_tir = dailyTimeInRange(timeInRange=tir['in-range'], timeHigh=tir['high'], timeLow=tir['low'], date=current_date, date_recorded=datetime.now())
             
-            db.session.add(daily_tir) 
+            try:
+                db.session.add(daily_tir) 
+                db.session.commit()
+            except IntegrityError as e:
+                db.session.rollback()
+                print(f"Exception: {e.orig}")  #Log 
 
             current_date += timedelta(days=1)
-
-        try:
-                db.session.commit()
-        except IntegrityError as e:
-            db.session.rollback()
-            print(f"Exception: {e.orig}")  #Log 
-
-
 
 def get_average_glucose():
     with current_app.app_context():

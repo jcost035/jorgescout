@@ -7,6 +7,7 @@ import A1cTile from '@/components/A1cTile';
 import TimeInRangeChart from '@/components/TimeInRangeChart';
 import SegmentChart from '@/components/SegmentChart';
 import AverageGlucoseTile from './AverageGlucoseTile';
+import StandardDeviationTile from './StandardDeviationTile';
 
 
 
@@ -35,7 +36,7 @@ export default function DataScroll() {
                     </View>
                     <View style={styles.horizontalSeparator} />
                     <View style={{ flexDirection: "row"}}>
-                        <View style={{height: sideLength, width: sideLength, backgroundColor: ""}}></View>
+                        <StandardDeviationTile/>
                         <View style={styles.verticalSeparator} />
                         <View style={{height: sideLength, width: sideLength, backgroundColor: ""}}></View>
                         <View style={styles.verticalSeparator} />
