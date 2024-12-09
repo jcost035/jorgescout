@@ -8,6 +8,7 @@ import TimeInRangeChart from '@/components/TimeInRangeChart';
 import SegmentChart from '@/components/SegmentChart';
 import AverageGlucoseTile from './AverageGlucoseTile';
 import StandardDeviationTile from './StandardDeviationTile';
+import CoefficientofVarianceTile from './CoefficientOfVarianceTile';
 
 
 
@@ -38,7 +39,7 @@ export default function DataScroll() {
                     <View style={{ flexDirection: "row"}}>
                         <StandardDeviationTile/>
                         <View style={styles.verticalSeparator} />
-                        <View style={{height: sideLength, width: sideLength, backgroundColor: ""}}></View>
+                        <CoefficientofVarianceTile/>
                         <View style={styles.verticalSeparator} />
                         <View style={{height: sideLength, width: sideLength, backgroundColor: ""}}></View>
                     </View>

@@ -13,6 +13,8 @@ interface DataPoint {
 
 const DEFAULT_YAXIS = 250;
 const FIVE_MINUTES = 5*60000;
+const FOUR_HOURS = 4 * 60 * 60 * 1000;
+const FOUR_HOURS_MINS = 240;
 
 const ScatterPlot = () => {
 
@@ -20,12 +22,11 @@ const ScatterPlot = () => {
 
     useEffect(() => {
         const fetchData = async () => {
-            const response = await getHistory(50);
-
+            const response = await getHistory(FOUR_HOURS_MINS);
             const history_data:DataPoint[] = [];
-
-            const firstTime = new Date(response.history[49].TimeString);
-            const startTime = new Date(firstTime.getTime() - FIVE_MINUTES);
+            
+            //const firstTime = new Date(response.history[response.history.length - 1].TimeString);
+            const startTime = new Date(new Date().getTime() - FOUR_HOURS + FIVE_MINUTES);
             history_data.push({x:startTime, y: -1000});
             
             response.history.map((item:{ TimeString: string, Value: number}) => history_data.push({x: new Date(item.TimeString), y: item.Value}));
@@ -39,7 +40,7 @@ const ScatterPlot = () => {
 
         fetchData();
         
-        const interval = setInterval(fetchData, 300000);
+        const interval = setInterval(fetchData, FIVE_MINUTES);
 
         return () => {clearInterval(interval)};
 
@@ -48,7 +49,7 @@ const ScatterPlot = () => {
     // Dimensions and margins
     const width = 375;
     const height = 250;
-    const margin = { top: 20, right: 20, bottom: 40, left: 40 };
+    const margin = { top: 20, right: 40, bottom: 40, left: 20 };
 
     // Chart dimensions
     const chartWidth = width - margin.left - margin.right;
@@ -121,10 +122,10 @@ const ScatterPlot = () => {
                     <G key={index} translateX={-5} translateY={y}>
                         <Line x1={5} y1={0} x2={chartWidth + 5} y2={0} stroke="#e3e3e3" />
                         <Text
-                        x={-10}
+                        x={chartWidth + 10}
                         y={4}
                         fontSize={10}
-                        textAnchor="end"
+                        textAnchor="start"
                         fill="black"
                         >
                         {tick}

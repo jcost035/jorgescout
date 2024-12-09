@@ -32,6 +32,10 @@ const colorPalette = [
   '#8c564b', '#e377c2', '#7f7f7f', '#bcbd22', '#17becf',
 ];
 
+const getApproximatePercentage = (tir: number) => {
+  return (tir < 1) ? "<1% " : tir + "% "
+}
+
 
 const PieChart: React.FC<PieChartProps> = ({ width = screenWidth / 3 - 40, height = screenWidth / 3 - 40 }) => {
   const [data, setData] = useState<PieData[]>(testData);
@@ -95,7 +99,7 @@ const PieChart: React.FC<PieChartProps> = ({ width = screenWidth / 3 - 40, heigh
         </G>
       </Svg>
       <View style={{flexDirection: "row", paddingBottom: 1}}>
-        <Text style={{color: "red"}}>{data[1].value + "% " }</Text><Text style={{color: "green"}}>{ data[2].value + "% " }</Text><Text style={{color: "orange"}}>{ data[0].value + "%" }</Text>
+        <Text style={{color: "red"}}>{getApproximatePercentage(data[1].value)}</Text><Text style={{color: "green"}}>{ getApproximatePercentage(data[2].value) }</Text><Text style={{color: "orange"}}>{ getApproximatePercentage(data[0].value) }</Text>
       </View>
     </View>
   );

@@ -1,5 +1,5 @@
 import React, { PureComponent, useState, useEffect } from 'react'
-import { Svg, G, Rect, Line, Text } from 'react-native-svg'
+import { Svg, G, Rect, Line, Text, TSpan } from 'react-native-svg'
 import { Dimensions } from 'react-native'
 import { Text as ReactText } from 'react-native'
 import * as d3 from 'd3'
@@ -36,7 +36,8 @@ for (let i = 11; i < 30; i++) {
 }
 
 const colors = {
-    yellow: "#CCFFCC",
+    red: "#FF5C5C",
+    yellow: "yellow",
     lyg: "#99FF99",
     yg: "#66FF66",
     lg: "#33CC33",
@@ -47,9 +48,8 @@ const colors = {
 }
 
 const getSegmentColor = (tir: number) => {
-    if (tir < 70) { return colors.yellow }
-    else if (tir < 75) { return colors.lyg }
-    else if (tir < 80) {return colors.yg }
+    if (tir < 70) { return colors.red }
+    else if (tir < 80) {return colors.yellow }
     else if (tir < 85) { return colors.lg }
     else if (tir < 90) { return colors.g }
     else {return colors.dg}
@@ -57,6 +57,7 @@ const getSegmentColor = (tir: number) => {
 
 export default function segmentChart() {
         const [data, setData] = useState<SegmentData[]>(testData);
+        const [activeElement, setActiveElement] = useState<string | null>(null);
 
         useEffect(() => {
             const fetchData = async () => {
@@ -115,19 +116,46 @@ export default function segmentChart() {
                         <Rect
                             key={index}
                             x={x(item.date)! - (barWidth / 2)}
-                            y={-50}
+                            y={-60}
                             rx={2.5}
                             width={barWidth}
                             height={15}
                             fill={item.color}
+                            onPressIn={() => {setActiveElement(item.date)}}
+                            onPressOut={() => {setActiveElement(null)}}
                         />
                     ))}
 
+                    { activeElement &&
+                        (<>
+                            <Rect
+                                x={20}
+                                y={-120}
+                                width={75}
+                                height={50}
+                                fill="black"
+                                stroke={getSegmentColor(data.find((item) => activeElement === item.date)!.tir)}
+                                strokeWidth={3}
+                                rx={3}
+                            />
+                            <Text
+                                x={25}
+                                y={-100}
+                                fill="white"
+                            >
+                                <TSpan>Date: {data.find((item) => activeElement === item.date)?.date}</TSpan>
+                                <TSpan x={25} dy={15}>TIR: {data.find((item) => activeElement === item.date)?.tir}%</TSpan>
+                            </Text>
+                        </>)   
+                    }
+                    
+
+                    
                     <Line
                         x1="10"
-                        y1="-15"
+                        y1="-25"
                         x2={screenWidth-10}
-                        y2="-15"
+                        y2="-25"
                         stroke="black"
                         strokeWidth="0.5"
                     />
@@ -136,10 +164,10 @@ export default function segmentChart() {
                     {xTicks.map((tick) => (
                         <Line
                             key={x(tick)}
-                            x1={x(tick)!}
-                            x2={x(tick)!}
-                            y1={-10}
-                            y2={-20}
+                            x1={x(tick)}
+                            x2={x(tick)}
+                            y1={-20}
+                            y2={-30}
                             stroke={"black"}
                         />
                     ))}
@@ -147,8 +175,8 @@ export default function segmentChart() {
                     {xTicks.map((tick) => (
                         <Text
                             key={x(tick)}
-                            x={x(tick)!}
-                            y={5}
+                            x={x(tick)}
+                            y={0}
                             fontSize={15}
                             textAnchor="middle"
                             fill="black"

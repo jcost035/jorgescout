@@ -13,9 +13,9 @@ def take_reading(app):
     try:
         dexcom_reading = dexcom.get_current_glucose_reading()
 
-        if dexcom_reading is None:
-            print("No reading!")  #Log 
-            return
+        # if dexcom_reading is None:
+        #     print("No reading!")  #Log 
+        #     return
         
     except Exception as e:
         print(f"Exception: {str(e)}") #log

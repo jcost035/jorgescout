@@ -55,8 +55,34 @@ def latest_reading_route():
 @bp.route('/history/<int:reading_count>', methods=['GET'])
 def history_route(reading_count=10):
     dexcom = Dexcom(username="jorge.costa5633@gmail.com", password="012106J-c")
-    glucose_reading = dexcom.get_current_glucose_reading()
     history = dexcom.get_glucose_readings(max_count=reading_count)
+
+    def to_json(reading):
+        return reading.json
+    
+    def create_js_date_string(dt):
+        return dt.strftime('%Y-%m-%dT%H:%M:%S.%fZ')
+    
+    def date_string_conversion(reading):
+        time = datetime.utcfromtimestamp(int(reading["ST"][5:-4]))
+
+        reading["TimeString"] = create_js_date_string(time)
+        reading["Hour"] = time.hour
+        reading["Minute"] = time.minute
+
+
+    history_list = list(map(to_json, history))
+
+    histroy_list = list(map(date_string_conversion, history_list))
+
+    return jsonify({
+        'history': history_list
+    })
+
+@bp.route('/history/minutes/<int:minutes>', methods=['GET'])
+def history_minutes_route(minutes=60):
+    dexcom = Dexcom(username="jorge.costa5633@gmail.com", password="012106J-c")
+    history = dexcom.get_glucose_readings(minutes=minutes)
 
     def to_json(reading):
         return reading.json
@@ -109,6 +135,7 @@ def get_daily_tir(tir_count=30):
     tir_list = list(map(to_json, tir_values))
 
     return jsonify(tir_list)
+
     
 def register_routes(app):
     app.register_blueprint(bp)
