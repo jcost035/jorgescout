@@ -18,26 +18,9 @@ interface SegmentData {
     date: string
 }
 
-const n = 10;
-const testData = [{ tir: 5, day: "0" , color: "#15AD13", date: "10/31" }];
-
-for (let i = 1; i < n; i++) {
-    testData.push(
-        { tir: 5, day: i.toString(), color: "#15AD13", date: "11/" + (i + 1).toString() }
-    );
-}
-
-testData.push({tir: 5, day: "10", color: "yellow", date: "11/11" });
-
-for (let i = 11; i < 30; i++) {
-    testData.push(
-    { tir: 5, day: i.toString(), color: "#15AD13", date: "11/" + (i + 1).toString() }
-    );
-}
-
 const colors = {
     red: "#FF5C5C",
-    yellow: "yellow",
+    yellow: "orange",
     lyg: "#99FF99",
     yg: "#66FF66",
     lg: "#33CC33",
@@ -67,7 +50,8 @@ export default function segmentChart() {
 
                 response.map((item: { timeInRange: number, date: string }, index: number) => {
                     const date = new Date(item.date);
-                    const dateString = date.getMonth() + "/" + date.getDate();
+                    const dateString = date.getMonth() + 1 + "/" + date.getDate();
+                    console.log(dateString)
                     tirData.push({ 
                         tir: item.timeInRange, 
                         day: index.toString(), 
@@ -190,3 +174,20 @@ export default function segmentChart() {
         )
         
     }
+
+const n = 10;
+const testData = [{ tir: 5, day: "0" , color: "#15AD13", date: "10/31" }];
+
+for (let i = 1; i < n; i++) {
+    testData.push(
+        { tir: 5, day: i.toString(), color: "#15AD13", date: "11/" + (i + 1).toString() }
+    );
+}
+
+testData.push({tir: 5, day: "10", color: "yellow", date: "11/11" });
+
+for (let i = 11; i < 30; i++) {
+    testData.push(
+    { tir: 5, day: i.toString(), color: "#15AD13", date: "11/" + (i + 1).toString() }
+    );
+}
