@@ -9,6 +9,7 @@ import SegmentChart from '@/components/SegmentChart';
 import AverageGlucoseTile from './AverageGlucoseTile';
 import StandardDeviationTile from './StandardDeviationTile';
 import CoefficientofVarianceTile from './CoefficientOfVarianceTile';
+import ConfidenceIntervalTile from './ConfidenceIntervalTile';
 
 
 
@@ -41,7 +42,7 @@ export default function DataScroll() {
                         <View style={styles.verticalSeparator} />
                         <CoefficientofVarianceTile/>
                         <View style={styles.verticalSeparator} />
-                        <View style={{height: sideLength, width: sideLength, backgroundColor: ""}}></View>
+                        <ConfidenceIntervalTile/>
                     </View>
                     <View style={styles.horizontalSeparator} />
 

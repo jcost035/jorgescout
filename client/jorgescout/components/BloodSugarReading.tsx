@@ -21,7 +21,7 @@ export default function BloodSugarReading() {
             }
             catch(error) {
                 console.error("Error: ", error);
-                setReading("Error fetching reading");
+                setReading("Error");
             }
         };
          
@@ -45,7 +45,7 @@ export default function BloodSugarReading() {
 
 const styles = StyleSheet.create({
     largeReading: {
-        fontSize: 50,
+        fontSize: 60,
         fontWeight: 'bold'
     }
 });

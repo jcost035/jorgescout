@@ -1,7 +1,7 @@
 import React, { PureComponent, useState, useEffect } from 'react'
 import { Svg, G, Rect, Line, Text, TSpan } from 'react-native-svg'
 import { Dimensions } from 'react-native'
-import { Text as ReactText } from 'react-native'
+import { Text as ReactText, PanResponder } from 'react-native'
 import * as d3 from 'd3'
 import { getDailyTimeInRange } from '@/scripts/scripts';
 import { test } from 'vitest';
@@ -40,7 +40,7 @@ const getSegmentColor = (tir: number) => {
 
 export default function segmentChart() {
         const [data, setData] = useState<SegmentData[]>(testData);
-        const [activeElement, setActiveElement] = useState<string | null>(null);
+        const [activeElement, setActiveElement] = useState<string | null>("");
 
         useEffect(() => {
             const fetchData = async () => {
@@ -51,7 +51,7 @@ export default function segmentChart() {
                 response.map((item: { timeInRange: number, date: string }, index: number) => {
                     const date = new Date(item.date);
                     const dateString = date.getMonth() + 1 + "/" + date.getDate();
-                    console.log(dateString)
+
                     tirData.push({ 
                         tir: item.timeInRange, 
                         day: index.toString(), 
@@ -91,44 +91,75 @@ export default function segmentChart() {
         const yRange = [0, graphHeight];
         const y = d3.scaleLinear().domain(yDomain).range(yRange);
 
+
+        const updateActiveSegment = (touchX: number) => {
+            let minDistance = Infinity;
+            let nearestDate; 
+            data.map(item => {
+                const currentDistance = Math.abs(touchX - x(item.date)!);
+                if (currentDistance < minDistance) {
+                    minDistance = currentDistance;
+                    nearestDate = item.date;
+                };
+            }); // Find the closest bar index
+            console.log(nearestDate)
+            setActiveElement(nearestDate!)
+        }
+
+        const panResponder = PanResponder.create({
+            onStartShouldSetPanResponder: () => true,
+            onPanResponderGrant: (e, gestureState) => {
+                const touchX = gestureState.x0; // Get the X-coordinate of the touch
+                let minDistance = Infinity;
+                updateActiveSegment(touchX);
+                //setHighlightedIndex(nearestIndex);
+            },
+            onPanResponderMove: (e, gestureState) => {
+                const touchX = gestureState.moveX; // Get the X-coordinate of the touch
+                updateActiveSegment(touchX);
+            },
+            onPanResponderRelease: () => {
+                setActiveElement("");
+            }
+        });
+
         return (
-            <Svg width={screenWidth} height={sideLength}>
-                <ReactText style={{alignSelf: "center", fontSize: 20}}>{data.length} day times in range </ReactText>
+            <Svg width={screenWidth} height={sideLength} {...panResponder.panHandlers}>
+                {/* <ReactText style={{alignSelf: "center", fontSize: 20}}>{data.length} day times in range </ReactText> */}
 
                 <G key={11111} y={graphHeight}>
                     {data.map((item, index) => (
                         <Rect
                             key={index}
                             x={x(item.date)! - (barWidth / 2)}
-                            y={-60}
+                            y={item.date == activeElement ? -75 : -60}
                             rx={2.5}
                             width={barWidth}
-                            height={15}
-                            fill={item.color}
-                            onPressIn={() => {setActiveElement(item.date)}}
-                            onPressOut={() => {setActiveElement(null)}}
+                            height={item.date == activeElement ? 30 : 15}
+                            fill={activeElement == "" ? item.color : item.date == activeElement ? item.color : "gray"}
                         />
                     ))}
 
-                    { activeElement &&
+                    {
+                     activeElement &&
                         (<>
                             <Rect
-                                x={20}
-                                y={-120}
+                                x={x(data.find((item) => activeElement === item.date)!.date)! - 35}
+                                y={-105}
                                 width={75}
-                                height={50}
-                                fill="black"
-                                stroke={getSegmentColor(data.find((item) => activeElement === item.date)!.tir)}
+                                height={40}
+                                fill={getSegmentColor(data.find((item) => activeElement === item.date)!.tir)}
+                                // stroke={getSegmentColor(data.find((item) => activeElement === item.date)!.tir)}
                                 strokeWidth={3}
                                 rx={3}
                             />
                             <Text
-                                x={25}
-                                y={-100}
+                                x={x(data.find((item) => activeElement === item.date)!.date)! - 30}
+                                y={-90}
                                 fill="white"
                             >
                                 <TSpan>Date: {data.find((item) => activeElement === item.date)?.date}</TSpan>
-                                <TSpan x={25} dy={15}>TIR: {data.find((item) => activeElement === item.date)?.tir}%</TSpan>
+                                <TSpan x={x(data.find((item) => activeElement === item.date)!.date)! - 30} dy={15}>TIR: {data.find((item) => activeElement === item.date)?.tir}%</TSpan>
                             </Text>
                         </>)   
                     }

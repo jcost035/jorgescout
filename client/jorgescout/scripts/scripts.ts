@@ -20,7 +20,7 @@ export async function getReading() {
     }
     catch (error) {
       console.error('Error fetching data:', error);
-      return {value: 'Error fetching reading', trendArrow: ''};
+      return {value: 'Error', trendArrow: ''};
     }
 }
 

@@ -3,9 +3,14 @@ import { View, Text } from './Themed';
 import { getStats } from '@/scripts/scripts.ts';
 import {Dimensions, StyleSheet } from 'react-native';
 
-const RangePicker: React.FC<RangePickerProps> = ({ setGlobalRange }) => {
+interface RangePickerProps {
+    setGlobalRange: (range: string) => void;
+    ranges: string[];
+  }
 
-    const ranges = ['24', '12', '4'];
+const RangePicker: React.FC<RangePickerProps> = ({ setGlobalRange, ranges }) => {
+
+    //const ranges = ['24', '12', '4'];
     const [currentRange, setCurrentRange] = useState('4');
 
     useEffect(() => {

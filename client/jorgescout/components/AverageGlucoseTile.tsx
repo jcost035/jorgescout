@@ -14,8 +14,8 @@ export default function AverageGlucoseTile() {
         const fetchData = async () => {
             try{
                 const data = await getStats();
+
                 setAvgGlucose(data["average"]["average glucose"]);
-                //console.log(data);
             }
             catch(error) {
                 console.log(error, `Error: ${error}`)

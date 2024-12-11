@@ -1,5 +1,5 @@
 import React, {useState, useEffect} from "react";
-import { View } from "react-native";
+import { View, StyleSheet, Dimensions } from "react-native";
 import Svg, { Circle, G, Line, Text } from "react-native-svg";
 import * as d3 from "d3";
 import { getHistory } from '@/scripts/scripts.ts';
@@ -17,13 +17,14 @@ const FIVE_MINUTES = 5*60000;
 const FOUR_HOURS = 4 * 60 * 60 * 1000;
 const FOUR_HOURS_MINS = 240;
 
-const ScatterPlot = () => {
-
+export default function ScatterPlot() {
+    
     const [data, setData] = useState<DataPoint[]>([]);
+    const [scatterPlotRange, setScatterPlotRange] = useState(FOUR_HOURS_MINS);
 
     useEffect(() => {
         const fetchData = async () => {
-            const response = await getHistory(FOUR_HOURS_MINS);
+            const response = await getHistory(scatterPlotRange);
             const history_data:DataPoint[] = [];
             
             //const firstTime = new Date(response.history[response.history.length - 1].TimeString);
@@ -45,7 +46,7 @@ const ScatterPlot = () => {
 
         return () => {clearInterval(interval)};
 
-    }, []);
+    }, [scatterPlotRange]);
 
     // Dimensions and margins
     const width = 375;
@@ -74,20 +75,29 @@ const ScatterPlot = () => {
         .domain([0, yAxisHeight])
         .range([chartHeight, 0]);
 
-    // Generate ticks
-    const tickValues = d3.timeHour.every(1).range(xDomain[0], xDomain[1]);
+    // let tickValues:Date[] = []
+    const [tickValues, setTickValues] = useState<Date[]>([]);
+    useEffect(() => {
+        // Generate ticks
+        const spacing = scatterPlotRange > FOUR_HOURS_MINS ? 4 : 1
+        setTickValues(d3.timeHour.every(spacing)!.range(xDomain[0], xDomain[1]));
+        console.log(tickValues)
+    }, [data])
 
     const RANGE_FLOOR = 70
     const RANGE_CEILING = 180
 
-    const [scatterPlotRange, setScatterPlotRange] = useState(FOUR_HOURS_MINS);
 
     const setPlotRange = (rangeString:string) => {
-        setScatterPlotRange(Number(rangeString))
+        setScatterPlotRange(Number(rangeString) * 60);
     }
 
     return (
         <View style={{}}>
+
+            <View style={{flexDirection: "row", justifyContent: "flex-end", paddingBottom: 5, paddingRight: 10}}>
+                <RangePicker setGlobalRange={setPlotRange} ranges={['24','12','4']} />
+            </View>
 
             <Svg width={width} height={height}>
                 {/* Chart group */}
@@ -159,25 +169,26 @@ const ScatterPlot = () => {
                 </G>
             </Svg>
 
-            <View style={{flexDirection: "row", justifyContent: "flex-end", paddingBottom: 5, paddingRight: 10}}>
-                <RangePicker setGlobalRange={setPlotRange} />
-            </View>
+            <View style={styles.horizontalSeparator}></View>
 
         </View>
     );
-    };
+};
 
-    export default function App() {
-    const exampleData: DataPoint[] = [
-        { x: new Date("2024-12-04T08:56:00"), y: 10 },
-        { x: new Date("2024-12-04T09:01:00"), y: 15 },
-        { x: new Date("2024-12-04T09:45:00"), y: 20 },
-        { x: new Date("2024-12-04T10:10:00"), y: 25 },
-        { x: new Date("2024-12-04T10:56:00"), y: 30 },
-        { x: new Date("2024-12-04T09:47:00"), y: 20 },
-        { x: new Date("2024-12-04T10:15:00"), y: 25 },
-        { x: new Date("2024-12-04T12:12:00"), y: 30 },
-    ];
 
-    return <ScatterPlot/>;
-}
+
+
+const styles = StyleSheet.create(
+    {
+        horizontalSeparator: {
+            backgroundColor: "#dfdfdf",
+            height: 0.5,
+            width: Dimensions.get('screen').width,
+        },
+        verticalSeparator: {
+            backgroundColor: "#dfdfdf",
+            width: 1,
+            height: '100%',
+        }
+    }
+)
