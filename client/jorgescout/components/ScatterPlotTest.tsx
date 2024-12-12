@@ -81,7 +81,6 @@ export default function ScatterPlot() {
         // Generate ticks
         const spacing = scatterPlotRange > FOUR_HOURS_MINS ? 4 : 1
         setTickValues(d3.timeHour.every(spacing)!.range(xDomain[0], xDomain[1]));
-        console.log(tickValues)
     }, [data])
 
     const RANGE_FLOOR = 70

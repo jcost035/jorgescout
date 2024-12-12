@@ -19,10 +19,11 @@ export default function DataScroll() {
     const windowWidth = Dimensions.get('screen').width;
     const sideLength = windowWidth / 3;
     
+    const [scrollEnabled, setScrollEnabled] = useState(true);
 
     return (
         <GestureHandlerRootView>
-            <ScrollView>
+            <ScrollView scrollEnabled={scrollEnabled}>
                 <View style={{ width: windowWidth, flexDirection: "column"}}>
                     <View style={styles.horizontalSeparator} />
                     <View style={{ flexDirection: "row"}}>
@@ -34,7 +35,7 @@ export default function DataScroll() {
                     </View>
                     <View style={styles.horizontalSeparator} />
                     <View style={{ flexDirection: "row"}}>
-                        <SegmentChart/>
+                        <SegmentChart scrollLock={() => {setScrollEnabled(false); console.log(scrollEnabled)}} scrollRelease={() => { setScrollEnabled(true)}}/>
                     </View>
                     <View style={styles.horizontalSeparator} />
                     <View style={{ flexDirection: "row"}}>

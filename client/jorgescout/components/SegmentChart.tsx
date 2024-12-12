@@ -1,10 +1,11 @@
-import React, { PureComponent, useState, useEffect } from 'react'
-import { Svg, G, Rect, Line, Text, TSpan } from 'react-native-svg'
-import { Dimensions } from 'react-native'
-import { Text as ReactText, PanResponder } from 'react-native'
+import React, { PureComponent, useState, useEffect, useRef } from 'react'
+import { Svg, G, Rect, Line, Text as SvgText, TSpan } from 'react-native-svg'
+import { Dimensions, View } from 'react-native'
+import { Text, PanResponder } from 'react-native'
 import * as d3 from 'd3'
 import { getDailyTimeInRange } from '@/scripts/scripts';
 import { test } from 'vitest';
+import * as Haptics from 'expo-haptics';
 
 const screenWidth = Dimensions.get('screen').width;
 const sideLength = screenWidth / 3;
@@ -38,7 +39,12 @@ const getSegmentColor = (tir: number) => {
     else {return colors.dg}
 }
 
-export default function segmentChart() {
+interface SegmentChartProps {
+    scrollLock: () => void,
+    scrollRelease: () => void
+}
+
+export default function segmentChart(props: SegmentChartProps) {
         const [data, setData] = useState<SegmentData[]>(testData);
         const [activeElement, setActiveElement] = useState<string | null>("");
 
@@ -91,41 +97,67 @@ export default function segmentChart() {
         const yRange = [0, graphHeight];
         const y = d3.scaleLinear().domain(yDomain).range(yRange);
 
+        let nearestDate: string = ""; 
 
         const updateActiveSegment = (touchX: number) => {
             let minDistance = Infinity;
-            let nearestDate; 
+            //nearestDate = ""; 
             data.map(item => {
                 const currentDistance = Math.abs(touchX - x(item.date)!);
                 if (currentDistance < minDistance) {
                     minDistance = currentDistance;
                     nearestDate = item.date;
                 };
-            }); // Find the closest bar index
-            console.log(nearestDate)
+            });
+            if (nearestDate != activeElement) {Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);};
             setActiveElement(nearestDate!)
-        }
+        };
+
+        const timeoutRef = useRef<number | null>(null);
+        const hasActivated = useRef(false);
+        
 
         const panResponder = PanResponder.create({
             onStartShouldSetPanResponder: () => true,
             onPanResponderGrant: (e, gestureState) => {
-                const touchX = gestureState.x0; // Get the X-coordinate of the touch
-                let minDistance = Infinity;
-                updateActiveSegment(touchX);
-                //setHighlightedIndex(nearestIndex);
+                const touchX = gestureState.x0; 
+
+                hasActivated.current = false;
+
+                timeoutRef.current = setTimeout(() => { //stfu linter
+                    hasActivated.current = true;
+                    let minDistance = Infinity;
+                    props.scrollLock();
+                    updateActiveSegment(touchX);
+                  }, 500);
+
+                
             },
             onPanResponderMove: (e, gestureState) => {
-                const touchX = gestureState.moveX; // Get the X-coordinate of the touch
-                updateActiveSegment(touchX);
+                const touchX = gestureState.moveX;
+                const touchY = gestureState.moveY;
+
+                if (Math.abs(touchX) > 10 || Math.abs(touchY) > 10) {
+                    clearTimeout(timeoutRef.current);
+                  }
+          
+                  if (hasActivated.current) {
+                    updateActiveSegment(touchX);
+                  }
             },
             onPanResponderRelease: () => {
+                props.scrollRelease();
                 setActiveElement("");
+                if (timeoutRef.current !== null) {
+                    clearTimeout(timeoutRef.current);
+                    timeoutRef.current = null; // Reset to null
+                  }
             }
         });
 
         return (
             <Svg width={screenWidth} height={sideLength} {...panResponder.panHandlers}>
-                {/* <ReactText style={{alignSelf: "center", fontSize: 20}}>{data.length} day times in range </ReactText> */}
+                <SvgText x={x("12/1")} y ={-75}>{data.length} day times in range </SvgText>
 
                 <G key={11111} y={graphHeight}>
                     {data.map((item, index) => (
@@ -153,18 +185,16 @@ export default function segmentChart() {
                                 strokeWidth={3}
                                 rx={3}
                             />
-                            <Text
+                            <SvgText
                                 x={x(data.find((item) => activeElement === item.date)!.date)! - 30}
                                 y={-90}
                                 fill="white"
                             >
-                                <TSpan>Date: {data.find((item) => activeElement === item.date)?.date}</TSpan>
+                                <TSpan>{data.find((item) => activeElement === item.date)?.date}</TSpan>
                                 <TSpan x={x(data.find((item) => activeElement === item.date)!.date)! - 30} dy={15}>TIR: {data.find((item) => activeElement === item.date)?.tir}%</TSpan>
-                            </Text>
+                            </SvgText>
                         </>)   
                     }
-                    
-
                     
                     <Line
                         x1="10"
@@ -188,7 +218,7 @@ export default function segmentChart() {
                     ))}
 
                     {xTicks.map((tick) => (
-                        <Text
+                        <SvgText
                             key={x(tick)}
                             x={x(tick)}
                             y={0}
@@ -197,7 +227,7 @@ export default function segmentChart() {
                             fill="black"
                         >
                             {tick}
-                        </Text>
+                        </SvgText>
                     ))}
 
                 </G>

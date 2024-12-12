@@ -25,6 +25,7 @@
     "deprecated-react-native-prop-types": "^5.0.0",
     "expo": "~52.0.10",
     "expo-font": "~13.0.1",
+    "expo-haptics": "~14.0.0",
     "expo-linking": "~7.0.3",
     "expo-router": "~4.0.7",
     "expo-splash-screen": "~0.29.13",
