@@ -1,6 +1,6 @@
 import React, {useState, useEffect} from "react";
-import { View, StyleSheet, Dimensions } from "react-native";
-import Svg, { Circle, G, Line, Text } from "react-native-svg";
+import { View, StyleSheet, Dimensions, PanResponder } from "react-native";
+import Svg, { Circle, G, Line, Text as SvgText, Rect, TSpan } from "react-native-svg";
 import * as d3 from "d3";
 import { getHistory } from '@/scripts/scripts.ts';
 import RangePicker from "./RangePicker";
@@ -91,6 +91,42 @@ export default function ScatterPlot() {
         setScatterPlotRange(Number(rangeString) * 60);
     }
 
+    const [activePoint, setActivePoint] = useState<Date | null>(null);
+
+    const panResponder = PanResponder.create({
+        onStartShouldSetPanResponder: () => true,
+        onPanResponderGrant: (e, gestureState) => {
+            const touchX = gestureState.x0 - margin.left; 
+
+            
+            let shortestDistance = Infinity;
+            let closestPoint = null;
+            data.map((item) => {
+                if (Math.abs(xScale(item.x) - touchX) < shortestDistance) {
+                    shortestDistance = Math.abs(xScale(item.x) - touchX);
+                    closestPoint = item.x;
+                }
+            });
+            setActivePoint(closestPoint);
+        },
+        onPanResponderMove: (e, gestureState) => {
+            const touchX = gestureState.moveX - margin.left;
+
+            let shortestDistance = Infinity;
+            let closestPoint = null;
+            data.map((item) => {
+                if (Math.abs(xScale(item.x) - touchX) < shortestDistance) {
+                    shortestDistance = Math.abs(xScale(item.x) - touchX);
+                    closestPoint = item.x;
+                }
+            });
+            setActivePoint(closestPoint);
+        },
+        onPanResponderRelease: () => {
+            setActivePoint(null);
+        }
+    });
+
     return (
         <View style={{}}>
 
@@ -98,7 +134,7 @@ export default function ScatterPlot() {
                 <RangePicker setGlobalRange={setPlotRange} ranges={['24','12','4']} />
             </View>
 
-            <Svg width={width} height={height}>
+            <Svg width={width} height={height} {...panResponder.panHandlers}>
                 {/* Chart group */}
                 <G translateX={margin.left} translateY={margin.top}>
                     {/* X-Axis */}
@@ -114,7 +150,7 @@ export default function ScatterPlot() {
                         return (
                         <G key={index} translateX={x} translateY={chartHeight}>
                             <Line x1={0} y1={0} x2={0} y2={-1 * chartHeight} stroke="#e3e3e3" />
-                            <Text
+                            <SvgText
                             x={0}
                             y={15}
                             fontSize={10}
@@ -122,11 +158,12 @@ export default function ScatterPlot() {
                             fill="black"
                             >
                             {d3.timeFormat("%-I %p")(tick)}
-                            </Text>
+                            </SvgText>
                         </G>
                         );
                     })}
 
+                    {/* Floor & ceiling */}
                     <Line x1={0} y1={yScale(RANGE_CEILING)} x2={chartWidth} y2={yScale(RANGE_CEILING)} stroke="orange"/>
                     <Line x1={0} y1={yScale(RANGE_FLOOR)} x2={chartWidth} y2={yScale(RANGE_FLOOR)} stroke="red"/>
 
@@ -138,7 +175,7 @@ export default function ScatterPlot() {
                         return (
                         <G key={index} translateX={-5} translateY={y}>
                             <Line x1={5} y1={0} x2={chartWidth + 5} y2={0} stroke="#e3e3e3" />
-                            <Text
+                            <SvgText
                             x={chartWidth + 10}
                             y={4}
                             fontSize={10}
@@ -146,10 +183,29 @@ export default function ScatterPlot() {
                             fill="black"
                             >
                             {tick}
-                            </Text>
+                            </SvgText>
                         </G>
                         );
                     })}
+
+                    {/* Point highlighting on touch */}
+                    <Line x1={activePoint != null ? xScale(activePoint!) : 0} y1={0} x2={activePoint != null ? xScale(activePoint!) : 0} y2={chartHeight} stroke="#e3e3e3" />
+                    <Rect 
+                        x={activePoint != null ? xScale(data.find((item) => activePoint === item.x)!.x) : -1000} 
+                        y={-20}
+                        height={50} 
+                        width={100} 
+                        fill={activePoint != null ? "black" : "none"}
+                    />
+                    <SvgText
+                        x={activePoint != null ? xScale(data.find((item) => activePoint === item.x)!.x) : 0}
+                        y={5}
+                        fill="white"
+                        fontSize={20}
+                    >
+                        <TSpan>{data.find((item) => activePoint === item.x)?.y.toString()}</TSpan>
+                        {/* <TSpan x={x(data.find((item) => activeElement === item.date)!.date)! - 30} dy={15}>TIR: {data.find((item) => activeElement === item.date)?.tir}%</TSpan> */}
+                    </SvgText>
 
                     {/* Data points */}
                     {data.map((point, index) => {

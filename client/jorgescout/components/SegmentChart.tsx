@@ -101,7 +101,6 @@ export default function segmentChart(props: SegmentChartProps) {
 
         const updateActiveSegment = (touchX: number) => {
             let minDistance = Infinity;
-            //nearestDate = ""; 
             data.map(item => {
                 const currentDistance = Math.abs(touchX - x(item.date)!);
                 if (currentDistance < minDistance) {
@@ -109,6 +108,7 @@ export default function segmentChart(props: SegmentChartProps) {
                     nearestDate = item.date;
                 };
             });
+
             if (nearestDate != activeElement) {Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);};
             setActiveElement(nearestDate!)
         };
@@ -137,6 +137,7 @@ export default function segmentChart(props: SegmentChartProps) {
                 const touchX = gestureState.moveX;
                 const touchY = gestureState.moveY;
 
+                console.log(touchX + ", " + touchY)
                 if (Math.abs(touchX) > 10 || Math.abs(touchY) > 10) {
                     clearTimeout(timeoutRef.current);
                   }
@@ -150,16 +151,17 @@ export default function segmentChart(props: SegmentChartProps) {
                 setActiveElement("");
                 if (timeoutRef.current !== null) {
                     clearTimeout(timeoutRef.current);
-                    timeoutRef.current = null; // Reset to null
+                    timeoutRef.current = null;
                   }
             }
         });
 
         return (
             <Svg width={screenWidth} height={sideLength} {...panResponder.panHandlers}>
-                <SvgText x={x("12/1")} y ={-75}>{data.length} day times in range </SvgText>
 
                 <G key={11111} y={graphHeight}>
+                    <SvgText x={100} y ={-100} fill={"black"} fontSize={20}>{data.length} day times in range </SvgText>
+
                     {data.map((item, index) => (
                         <Rect
                             key={index}
@@ -168,7 +170,8 @@ export default function segmentChart(props: SegmentChartProps) {
                             rx={2.5}
                             width={barWidth}
                             height={item.date == activeElement ? 30 : 15}
-                            fill={activeElement == "" ? item.color : item.date == activeElement ? item.color : "gray"}
+                            fill={item.color}
+                            opacity={activeElement == "" || item.date == activeElement ? 1 : 0.5}
                         />
                     ))}
 
