@@ -19,6 +19,7 @@ def create_app():
 
     scheduler.add_job(func=lambda:take_reading(app), trigger="interval", minutes=5, id="take_reading")
     #scheduler.add_job(func=lambda:fill_in_gaps(app), trigger="interval", minutes=24, id="fill_in_gaps")
+    scheduler.add_job(func=lambda:populate_daily_time_in_range(app), trigger='cron', hour=0, minute=10)
 
     populate_daily_time_in_range(app)
 
