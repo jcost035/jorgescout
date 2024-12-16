@@ -1,7 +1,7 @@
 from flask import jsonify, Blueprint, current_app, Response
 from pydexcom import Dexcom
-from server.models import Reading, dailyTimeInRange
-from server.extensions import db
+from .models import Reading, dailyTimeInRange
+from .extensions import db
 from tasks import get_time_in_range, get_average_glucose, get_a1c, get_standard_deviation
 from datetime import datetime
 import time

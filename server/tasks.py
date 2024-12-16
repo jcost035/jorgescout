@@ -2,8 +2,8 @@ from sqlalchemy.exc import IntegrityError
 from sqlalchemy import func
 from datetime import datetime, timezone, timedelta
 from flask import current_app
-from server.extensions import db, dexcom
-from server.models import Reading, dailyTimeInRange
+from .extensions import db, dexcom
+from .models import Reading, dailyTimeInRange
 from math import sqrt
 
 latest_reading = None
