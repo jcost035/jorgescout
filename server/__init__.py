@@ -2,7 +2,7 @@ from flask import Flask
 from .extensions import db, scheduler
 from .config import Config
 from .routes import register_routes
-from .tasks import take_reading, fill_in_gaps
+from .tasks import take_reading, fill_in_gaps, populate_daily_time_in_range
 from flask_migrate import Migrate
 from flask_cors import CORS 
 
