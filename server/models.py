@@ -1,6 +1,6 @@
 from sqlalchemy.orm import Mapped, mapped_column
 from datetime import datetime
-from server.extensions import db
+from .extensions import db
 
 class Reading(db.Model):
     id: Mapped[int] = mapped_column(primary_key=True)
