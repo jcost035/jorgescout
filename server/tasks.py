@@ -203,8 +203,8 @@ def get_ambulatory_glucose_profile_data(start_date):
                 readings_slice = list(map(lambda x: x.value, db.session.execute(query).scalars()))
 
                 if len(readings_slice) > 0: #aforementioned weird comparison causes empty slice
-                    mean = round(statistics.mean(readings_slice), 2)
-                    st_dev = round(statistics.stdev(readings_slice), 2)
+                    mean = round(statistics.mean(readings_slice))
+                    st_dev = round(statistics.stdev(readings_slice))
 
                     agp_data_list.append({"mean" : mean, "standard deviation" : st_dev, "time" : current})
 
