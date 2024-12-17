@@ -1,10 +1,11 @@
 from sqlalchemy.exc import IntegrityError
-from sqlalchemy import func
+from sqlalchemy import func, Time, cast
 from datetime import datetime, timezone, timedelta
 from flask import current_app
 from .extensions import db, dexcom
 from .models import Reading, dailyTimeInRange
 from math import sqrt
+import statistics
 
 latest_reading = None
 gap_end_times = []
@@ -135,8 +136,8 @@ def populate_daily_time_in_range(app):
 
         while(current_date.date() < datetime.now().date()):
             tir =  get_time_in_range(current_date,current_date)
-
-            daily_tir = dailyTimeInRange(timeInRange=tir['in-range'], timeHigh=tir['high'], timeLow=tir['low'], date=current_date, date_recorded=datetime.now())
+            if tir is not None:
+                daily_tir = dailyTimeInRange(timeInRange=tir['in-range'], timeHigh=tir['high'], timeLow=tir['low'], date=current_date, date_recorded=datetime.now())
             
             try:
                 db.session.add(daily_tir) 
@@ -190,6 +191,36 @@ def get_standard_deviation():
     standard_deviation = sqrt(variance)
 
     return round(standard_deviation)
+        
+def get_ambulatory_glucose_profile_data(start_date):
+    with current_app.app_context():
+        current = datetime(1994, 3, 29)
+        agp_data_list = []
+
+        with current_app.app_context():
+            for _ in range(288): #288 5 min periods in 24 hours (we end up w/ 287 bc of weird compairson of 11:55 < reading time < 12:00 but w/e)
+                query = db.select(Reading).where((current.time() <= cast(Reading.time, Time)) & (cast(Reading.time, Time) < (current + timedelta(minutes=5)).time()) & (start_date < Reading.time))
+                readings_slice = list(map(lambda x: x.value, db.session.execute(query).scalars()))
+
+                if len(readings_slice) > 0: #aforementioned weird comparison causes empty slice
+                    mean = statistics.mean(readings_slice)
+                    st_dev = statistics.stdev(readings_slice)
+
+                    agp_data_list.append({"mean" : mean, "standard deviation" : st_dev, "time" : current})
+
+                current = current + timedelta(minutes=5)
+            
+        return agp_data_list
+
+
+
+
+
+
+
+
+
+
         
 
 

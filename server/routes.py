@@ -2,7 +2,7 @@ from flask import jsonify, Blueprint, current_app, Response
 from pydexcom import Dexcom
 from .models import Reading, dailyTimeInRange
 from .extensions import db
-from .tasks import get_time_in_range, get_average_glucose, get_a1c, get_standard_deviation
+from .tasks import get_time_in_range, get_average_glucose, get_a1c, get_standard_deviation, get_ambulatory_glucose_profile_data
 from datetime import datetime
 import time
 import json
@@ -135,6 +135,13 @@ def get_daily_tir(tir_count=30):
     tir_list = list(map(to_json, tir_values))
 
     return jsonify(tir_list)
+
+@bp.route('/getagp/<string:start_date_string>')
+def get_agp(start_date_string):
+    start_date = datetime.strptime(start_date_string, "%Y-%m-%d")
+    agp_list = get_ambulatory_glucose_profile_data(start_date)
+
+    return jsonify(agp_list)
 
     
 def register_routes(app):
