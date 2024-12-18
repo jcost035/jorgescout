@@ -6,17 +6,12 @@ from .tasks import take_reading, fill_in_gaps, populate_daily_time_in_range, get
 from flask_migrate import Migrate
 from flask_cors import CORS 
 from datetime import datetime
-from sqlalchemy.pool import NullPool
 
 def create_app():
     app = Flask(__name__)
     app.config.from_object(Config)
 
     CORS(app) #specify resources parameter in production
-
-    app.config['SQLALCHEMY_ENGINE_OPTIONS'] = {
-        'poolclass': NullPool
-    }
     
     db.init_app(app)
     scheduler.init_app(app)
