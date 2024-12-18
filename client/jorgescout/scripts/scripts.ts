@@ -2,7 +2,7 @@ import DeviceInfo from 'react-native-device-info';
 // import { QueryClient, QueryClientProvider, useQuery } from '@tanstack/react-query';
 
 // const queryClient = new QueryClient();
-const ip = '192.168.0.130'
+const ip = '142.93.71.17'
 const home_ip = '127.0.0.1'
 
 export async function getReading() {
@@ -15,7 +15,7 @@ export async function getReading() {
           }
         }
         const data = await response.json();
-        return { value: data.latest_reading.toString() || 'No reading found ', trendArrow: data.trend_arrow };
+        return { value: data.latest_reading.toString() || 'No reading found', trendArrow: data.trend_arrow };
         //return data.latest_reading.toString() + " " + data.trend_arrow || 'No reading found';
     }
     catch (error) {
@@ -37,7 +37,6 @@ export async function getHistory(minutes: number) {
   catch (error) {
     console.error('Error fetching data:', error);
   }
-
 }
 
 export async function getStats() {

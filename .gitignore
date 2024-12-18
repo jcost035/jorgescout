@@ -29,6 +29,7 @@ client/yarn-error.*
 # macOS
 client/.DS_Store
 client/*.pem
+.DS_Store
 
 # local env files
 client/.env*.local
