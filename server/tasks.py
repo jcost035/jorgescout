@@ -150,8 +150,8 @@ def populate_daily_time_in_range(app):
 
 def get_average_glucose():
     with current_app.app_context():
-        query = db.select(func.count()).select_from(Reading)
-        reading_count = db.session.execute(query).scalar_one() 
+        query = db.select(func.count()).select_from(Reading).limit(1)
+        reading_count = db.session.execute(query).scalar_one_or_none() 
 
         query = db.select(Reading).order_by(Reading.time.asc()).limit(1)
         start_reading = db.session.execute(query).scalar_one_or_none()
