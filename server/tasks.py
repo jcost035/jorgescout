@@ -205,8 +205,15 @@ def get_ambulatory_glucose_profile_data(start_date):
                 if len(readings_slice) > 0: #aforementioned weird comparison causes empty slice
                     mean = round(statistics.mean(readings_slice))
                     st_dev = round(statistics.stdev(readings_slice))
+                    median = statistics.median(readings_slice)
+                    quartiles = [round(x) for x in statistics.quantiles(readings_slice, n=4)]
 
-                    agp_data_list.append({"mean" : mean, "standard deviation" : st_dev, "time" : current})
+                    agp_data_list.append({
+                        "mean" : mean, 
+                        "standard deviation" : st_dev, 
+                        "time" : current, 
+                        "quartiles" : quartiles
+                    })
 
                 current = current + timedelta(minutes=5)
             
