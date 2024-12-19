@@ -206,7 +206,7 @@ def get_ambulatory_glucose_profile_data(start_date):
                     mean = round(statistics.mean(readings_slice))
                     st_dev = round(statistics.stdev(readings_slice))
 
-                    agp_data_list.append({"mean" : mean, "standard deviation" : st_dev, "time" : current.time().strftime("%H:%M")})
+                    agp_data_list.append({"mean" : mean, "standard deviation" : st_dev, "time" : current})
 
                 current = current + timedelta(minutes=5)
             
