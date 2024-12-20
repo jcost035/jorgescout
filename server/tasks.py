@@ -207,12 +207,14 @@ def get_ambulatory_glucose_profile_data(start_date):
                     st_dev = round(statistics.stdev(readings_slice))
                     median = statistics.median(readings_slice)
                     quartiles = [round(x) for x in statistics.quantiles(readings_slice, n=4)]
+                    outliers = [round(x) for x in statistics.quantiles(readings_slice, n=20)]
 
                     agp_data_list.append({
                         "mean" : mean, 
                         "standard deviation" : st_dev, 
                         "time" : current, 
-                        "quartiles" : quartiles
+                        "quartiles" : quartiles,
+                        "outliers" : outliers
                     })
 
                 current = current + timedelta(minutes=5)

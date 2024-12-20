@@ -11,7 +11,9 @@ interface DataPoint {
   x: Date;
   y: number;
   yLow: number;
-  yHigh: number
+  yHigh: number;
+  yVeryLow: number;
+  yVeryHigh: number;
 }
 
 const DEFAULT_YAXIS = 250;
@@ -41,7 +43,9 @@ export default function AgpChart({graphHeight = 250}) {
                 x: new Date(item["time"]), 
                 y: item["quartiles"][1], 
                 yLow: item["quartiles"][0], 
-                yHigh: item["quartiles"][2]
+                yHigh: item["quartiles"][2],
+                yVeryLow: item["outliers"][0],
+                yVeryHigh: item["outliers"][18]
             }));
             
             // const lastTime = new Date(response.history[0].TimeString);
@@ -111,6 +115,16 @@ export default function AgpChart({graphHeight = 250}) {
     .y(d => yScale(d.yHigh))
     .curve(d3.curveBasis)(midLineData);
 
+    const lowerOutliersCurve = d3.line<DataPoint>()
+    .x(d => xScale(new Date(d.x)))
+    .y(d => yScale(d.yVeryLow))
+    .curve(d3.curveBasis)(midLineData);
+
+    const upperOutliersCurve = d3.line<DataPoint>()
+    .x(d => xScale(new Date(d.x)))
+    .y(d => yScale(d.yVeryHigh))
+    .curve(d3.curveBasis)(midLineData);
+
     const area = d3.area<DataPoint>()
     .x(d => xScale(d.x))
     .y0(d => yScale(d.yLow))
@@ -162,6 +176,8 @@ export default function AgpChart({graphHeight = 250}) {
                     <Path d={medianCurve!} strokeWidth="3" stroke="black" fill="none"/>
                     <Path d={upperQuartileCurve!} strokeWidth="2" stroke="blue" fill="none"/>
                     <Path d={lowerQuartileCurve!} strokeWidth="2" stroke="blue" fill="none"/>
+                    <Path d={upperOutliersCurve!} strokeWidth="2" stroke="blue" fill="none"/>
+                    <Path d={lowerOutliersCurve!} strokeWidth="2" stroke="blue" fill="none"/>
                     <Path d={area(midLineData)!} fill="steelblue" opacity={0.5} />
                     
                     {/* X-Axis */}
