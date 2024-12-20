@@ -137,7 +137,6 @@ export default function segmentChart(props: SegmentChartProps) {
                 const touchX = gestureState.moveX;
                 const touchY = gestureState.moveY;
 
-                console.log(touchX + ", " + touchY)
                 if (Math.abs(touchX) > 10 || Math.abs(touchY) > 10) {
                     clearTimeout(timeoutRef.current);
                   }

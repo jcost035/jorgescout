@@ -10,7 +10,8 @@ import AverageGlucoseTile from './AverageGlucoseTile';
 import StandardDeviationTile from './StandardDeviationTile';
 import CoefficientofVarianceTile from './CoefficientOfVarianceTile';
 import ConfidenceIntervalTile from './ConfidenceIntervalTile';
-
+import RangePicker from './RangePicker';
+import AgpChart from './AgpChart'
 
 
 export default function DataScroll() {
@@ -21,9 +22,20 @@ export default function DataScroll() {
     
     const [scrollEnabled, setScrollEnabled] = useState(true);
 
+    var tenYearsAgo = new Date(new Date().getTime() - (60000 * 60 * 24 * 365 * 10));
+    const [startDate, setStartDate] = useState(tenYearsAgo);
+
+    const setRange = (range: string) => {
+        const rangeStart = new Date(new Date().getTime() - (60000 * 60 * 24 * Number(range)))
+        setStartDate(rangeStart);
+    }
+
     return (
         <GestureHandlerRootView>
             <ScrollView scrollEnabled={scrollEnabled}>
+                <View style={{flexDirection: "row", justifyContent: "flex-end", paddingRight: 10}}>
+                    <RangePicker setGlobalRange={setRange} ranges={['90','30','1']} units='d' />
+                </View>
                 <View style={{ width: windowWidth, flexDirection: "column"}}>
                     <View style={styles.horizontalSeparator} />
                     <View style={{ flexDirection: "row"}}>
@@ -35,18 +47,22 @@ export default function DataScroll() {
                     </View>
                     <View style={styles.horizontalSeparator} />
                     <View style={{ flexDirection: "row"}}>
-                        <SegmentChart scrollLock={() => {setScrollEnabled(false); console.log(scrollEnabled)}} scrollRelease={() => { setScrollEnabled(true)}}/>
+                        <SegmentChart scrollLock={() => {setScrollEnabled(false)}} scrollRelease={() => { setScrollEnabled(true)}}/>
+                    </View>
+                    <View style={styles.horizontalSeparator} />
+                    <View style={{ flexDirection: "row"}}>
+                        <AgpChart graphHeight={sideLength}/>
                     </View>
                     <View style={styles.horizontalSeparator} />
                     <View style={{ flexDirection: "row"}}>
                         <StandardDeviationTile/>
                         <View style={styles.verticalSeparator} />
-                        <CoefficientofVarianceTile/>
-                        <View style={styles.verticalSeparator} />
                         <ConfidenceIntervalTile/>
+                        <View style={styles.verticalSeparator} />
+                        <CoefficientofVarianceTile/>
                     </View>
                     <View style={styles.horizontalSeparator} />
-
+                    
                 </View>
             </ScrollView>
         </GestureHandlerRootView>

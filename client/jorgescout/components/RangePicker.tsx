@@ -6,16 +6,17 @@ import {Dimensions, StyleSheet } from 'react-native';
 interface RangePickerProps {
     setGlobalRange: (range: string) => void;
     ranges: string[];
+    units: string;
   }
 
-const RangePicker: React.FC<RangePickerProps> = ({ setGlobalRange, ranges }) => {
+const RangePicker: React.FC<RangePickerProps> = ({ setGlobalRange, ranges, units }) => {
 
     //const ranges = ['24', '12', '4'];
-    const [currentRange, setCurrentRange] = useState('4');
+    const [currentRange, setCurrentRange] = useState(ranges[ranges.length - 1]);
 
     useEffect(() => {
         setGlobalRange(currentRange);
-    }, [currentRange, setGlobalRange]);
+    }, [currentRange]);
 
     return (
         <View style={styles.container}>
@@ -25,7 +26,7 @@ const RangePicker: React.FC<RangePickerProps> = ({ setGlobalRange, ranges }) => 
                     style={[styles.range, currentRange == range ? styles.selected : null]} 
                     onPress={() => setCurrentRange(range)} 
                 >
-                    <Text>{range}h</Text>
+                    <Text>{range}{units}</Text>
                 </Text>
             ))}
         </View>
@@ -44,7 +45,8 @@ const styles = StyleSheet.create({
         borderRadius: 5, 
         alignSelf: 'flex-start',
         paddingHorizontal: 5,
-        paddingVertical: 2
+        paddingVertical: 2,
+        marginVertical: 5
     },
     range: {
         paddingVertical: 3,
