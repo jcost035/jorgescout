@@ -14,6 +14,8 @@ interface DataPoint {
   yHigh: number;
   yVeryLow: number;
   yVeryHigh: number;
+  yReallySmall: number;
+  yReallyBig: number;
 }
 
 const DEFAULT_YAXIS = 250;
@@ -38,15 +40,23 @@ export default function AgpChart({graphHeight = 250}) {
             //const firstTime = new Date(response.history[response.history.length - 1].TimeString);
             // const startTime = new Date(new Date().getTime() - FOUR_HOURS);
             //history_data.push({x:startTime, y: -1000});
-
-            response.map((item:any) => midLineDataSet.push({
-                x: new Date(item["time"]), 
-                y: item["quartiles"][1], 
-                yLow: item["quartiles"][0], 
-                yHigh: item["quartiles"][2],
-                yVeryLow: item["outliers"][0],
-                yVeryHigh: item["outliers"][18]
-            }));
+            let i = 0
+            response.map((item:any) => {
+                if(i % 4 == 0) {
+                    midLineDataSet.push({
+                        x: new Date(item["time"]), 
+                        y: item["quartiles"][1], 
+                        yLow: item["quartiles"][0], 
+                        yHigh: item["quartiles"][2],
+                        yVeryLow: item["outliers"][1],
+                        yVeryHigh: item["outliers"][17],
+                        yReallySmall: item["outliers"][0],
+                        yReallyBig: item["outliers"][18]
+                    })
+                };
+                i++;
+            
+            });
             
             // const lastTime = new Date(response.history[0].TimeString);
             // const endTime = new Date(lastTime.getTime() + FIVE_MINUTES);
@@ -101,84 +111,62 @@ export default function AgpChart({graphHeight = 250}) {
     const RANGE_CEILING = 180
 
     const medianCurve = d3.line<DataPoint>()
-    .x(d => xScale(new Date(d.x)))
-    .y(d => yScale(d.y))
-    .curve(d3.curveBasis)(midLineData);
+        .x(d => xScale(new Date(d.x)))
+        .y(d => yScale(d.y))
+        .curve(d3.curveBasis)(midLineData);
 
     const lowerQuartileCurve = d3.line<DataPoint>()
-    .x(d => xScale(new Date(d.x)))
-    .y(d => yScale(d.yLow))
-    .curve(d3.curveBasis)(midLineData);
+        .x(d => xScale(new Date(d.x)))
+        .y(d => yScale(d.yLow))
+        .curve(d3.curveBasis)(midLineData);
 
     const upperQuartileCurve = d3.line<DataPoint>()
-    .x(d => xScale(new Date(d.x)))
-    .y(d => yScale(d.yHigh))
-    .curve(d3.curveBasis)(midLineData);
+        .x(d => xScale(new Date(d.x)))
+        .y(d => yScale(d.yHigh))
+        .curve(d3.curveBasis)(midLineData);
 
     const lowerOutliersCurve = d3.line<DataPoint>()
-    .x(d => xScale(new Date(d.x)))
-    .y(d => yScale(d.yVeryLow))
-    .curve(d3.curveBasis)(midLineData);
+        .x(d => xScale(new Date(d.x)))
+        .y(d => yScale(d.yVeryLow))
+        .curve(d3.curveBasis)(midLineData);
 
     const upperOutliersCurve = d3.line<DataPoint>()
-    .x(d => xScale(new Date(d.x)))
-    .y(d => yScale(d.yVeryHigh))
-    .curve(d3.curveBasis)(midLineData);
+        .x(d => xScale(new Date(d.x)))
+        .y(d => yScale(d.yVeryHigh))
+        .curve(d3.curveBasis)(midLineData);
 
-    const area = d3.area<DataPoint>()
-    .x(d => xScale(d.x))
-    .y0(d => yScale(d.yLow))
-    .y1(d => yScale(d.yHigh));
+    const quartileArea = d3.area<DataPoint>()
+        .x(d => xScale(d.x))
+        .y0(d => yScale(d.yLow))
+        .y1(d => yScale(d.yHigh));
+
+    const outlierArea = d3.area<DataPoint>()
+        .x(d => xScale(d.x))
+        .y0(d => yScale(d.yVeryLow))
+        .y1(d => yScale(d.yVeryHigh));
+
+    const reallyOutlierArea = d3.area<DataPoint>()
+        .x(d => xScale(d.x))
+        .y0(d => yScale(d.yReallySmall))
+        .y1(d => yScale(d.yReallyBig))
 
     const [activePoint, setActivePoint] = useState<Date | null>(null);
-
-    const panResponder = PanResponder.create({
-        onStartShouldSetPanResponder: () => true,
-        onPanResponderGrant: (e, gestureState) => {
-            const touchX = gestureState.x0 - margin.left; 
-
-            
-            let shortestDistance = Infinity;
-            let closestPoint = null;
-            midLineData.map((item) => {
-                if (Math.abs(xScale(item.x) - touchX) < shortestDistance) {
-                    shortestDistance = Math.abs(xScale(item.x) - touchX);
-                    closestPoint = item.x;
-                }
-            });
-            setActivePoint(closestPoint);
-        },
-        onPanResponderMove: (e, gestureState) => {
-            const touchX = gestureState.moveX - margin.left;
-
-            let shortestDistance = Infinity;
-            let closestPoint = null;
-            midLineData.map((item) => {
-                if (Math.abs(xScale(item.x) - touchX) < shortestDistance) {
-                    shortestDistance = Math.abs(xScale(item.x) - touchX);
-                    closestPoint = item.x;
-                }
-            });
-            setActivePoint(closestPoint);
-        },
-        onPanResponderRelease: () => {
-            setActivePoint(null);
-        }
-    });
 
     return (
         <View style={{}}>
 
-            <Svg width={width} height={height} {...panResponder.panHandlers}>
+            <Svg width={width} height={height} >
                 {/* Chart group */}
                 <G translateX={margin.left} translateY={margin.top}>
                     {/* Median, upper/lower quartiles and shading between them */}
+                    <Path d={reallyOutlierArea(midLineData)!} fill="steelblue" opacity={0.1} />
+                    <Path d={outlierArea(midLineData)!} fill="steelblue" opacity={0.2} />
+                    <Path d={quartileArea(midLineData)!} fill="steelblue" opacity={0.5} />
                     <Path d={medianCurve!} strokeWidth="3" stroke="black" fill="none"/>
-                    <Path d={upperQuartileCurve!} strokeWidth="2" stroke="blue" fill="none"/>
-                    <Path d={lowerQuartileCurve!} strokeWidth="2" stroke="blue" fill="none"/>
-                    <Path d={upperOutliersCurve!} strokeWidth="2" stroke="blue" fill="none"/>
-                    <Path d={lowerOutliersCurve!} strokeWidth="2" stroke="blue" fill="none"/>
-                    <Path d={area(midLineData)!} fill="steelblue" opacity={0.5} />
+                    {/* <Path d={upperQuartileCurve!} strokeWidth="2" stroke="blue" fill="none"/>
+                    <Path d={lowerQuartileCurve!} strokeWidth="2" stroke="blue" fill="none"/> */}
+                    {/* <Path d={upperOutliersCurve!} strokeWidth="2" stroke="blue" fill="none"/>
+                    <Path d={lowerOutliersCurve!} strokeWidth="2" stroke="blue" fill="none"/> */}
                     
                     {/* X-Axis */}
                     <Line
@@ -232,25 +220,6 @@ export default function AgpChart({graphHeight = 250}) {
                         </G>
                         );
                     })}
-
-                    {/* Point highlighting on touch */}
-                    <Line x1={activePoint != null ? xScale(activePoint!) : 0} y1={0} x2={activePoint != null ? xScale(activePoint!) : 0} y2={chartHeight} stroke="#e3e3e3" />
-                    <Rect 
-                        x={activePoint != null ? xScale(midLineData.find((item) => activePoint === item.x)!.x) : -1000} 
-                        y={-20}
-                        height={50} 
-                        width={100} 
-                        fill={activePoint != null ? "black" : "none"}
-                    />
-                    <SvgText
-                        x={activePoint != null ? xScale(midLineData.find((item) => activePoint === item.x)!.x) : 0}
-                        y={5}
-                        fill="white"
-                        fontSize={20}
-                    >
-                        <TSpan>{midLineData.find((item) => activePoint === item.x)?.y.toString()}</TSpan>
-                        {/* <TSpan x={x(data.find((item) => activeElement === item.date)!.date)! - 30} dy={15}>TIR: {data.find((item) => activeElement === item.date)?.tir}%</TSpan> */}
-                    </SvgText>
 
                     
                 </G>

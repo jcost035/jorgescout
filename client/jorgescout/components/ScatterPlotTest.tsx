@@ -189,18 +189,35 @@ export default function ScatterPlot() {
                     })}
 
                     {/* Point highlighting on touch */}
-                    <Line x1={activePoint != null ? xScale(activePoint!) : 0} y1={0} x2={activePoint != null ? xScale(activePoint!) : 0} y2={chartHeight} stroke="#e3e3e3" />
+                    <Line 
+                        x1={activePoint != null ? xScale(activePoint!) : -100} 
+                        y1={0} x2={activePoint != null ? xScale(activePoint!) : -100} 
+                        y2={chartHeight} 
+                        stroke={data.find((item) => activePoint === item.x)!?.y < 70 ?"red" : data.find((item) => activePoint === item.x)!?.y > 180 ?  "orange" : "green"}
+                    />
+                    <Line 
+                        x1={0} 
+                        y1={activePoint != null ? yScale(data.find((item) => activePoint === item.x)!?.y) : -1000} 
+                        x2={chartWidth} 
+                        y2={activePoint != null ? yScale(data.find((item) => activePoint === item.x)!?.y) : -1000} 
+                        stroke={data.find((item) => activePoint === item.x)!?.y < 70 ?"red" : data.find((item) => activePoint === item.x)!?.y > 180 ?  "orange" : "green"} 
+                    />
+
                     <Rect 
-                        x={activePoint != null ? xScale(data.find((item) => activePoint === item.x)!.x) : -1000} 
-                        y={-20}
+                        x={activePoint != null ? xScale(activePoint) : -1000} 
+                        y={-18}
                         height={50} 
-                        width={100} 
-                        fill={activePoint != null ? "black" : "none"}
+                        width={70} 
+                        fill={activePoint != null ? "lightgray" : "none"}
+                        rx={10}
+                        stroke={ data.find((item) => activePoint === item.x)!?.y >= 180 ? "orange" : data.find((item) => activePoint === item.x)!?.y < 70 ? "red" : "green"}
+                        strokeWidth={3}
+                        opacity={.5}
                     />
                     <SvgText
                         x={activePoint != null ? xScale(data.find((item) => activePoint === item.x)!.x) : 0}
                         y={5}
-                        fill="white"
+                        fill="black"
                         fontSize={20}
                     >
                         <TSpan>{data.find((item) => activePoint === item.x)?.y.toString()}</TSpan>

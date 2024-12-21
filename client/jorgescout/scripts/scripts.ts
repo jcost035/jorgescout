@@ -39,9 +39,17 @@ export async function getHistory(minutes: number) {
   }
 }
 
-export async function getStats() {
+export async function getStats(start_date:Date|null=null) {
   try {
-    const response = await fetch(`http://${ip}:5001/stats`);
+    let response:any;
+    if (start_date != null) {
+      response = await fetch(`http://${ip}:5001/stats/${start_date.getFullYear()}-${start_date.getMonth()}-${start_date.getDate()}`);
+
+    }
+    else
+    {
+      response = await fetch(`http://${ip}:5001/stats`);
+    }
     
     if (!response.ok) {
       throw new Error(`HTTP error! Status: ${response.status}`);

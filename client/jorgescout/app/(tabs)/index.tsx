@@ -3,7 +3,6 @@ import { StyleSheet } from 'react-native';
 import EditScreenInfo from '@/components/EditScreenInfo';
 import { Text, View } from '@/components/Themed';
 import BloodSugarReading from '@/components/BloodSugarReading';
-import ScatterPlot from '@/components/ScatterPlot';
 import { ScrollView } from 'react-native-reanimated/lib/typescript/Animated';
 import DataScroll from '@/components/DataScroll';
 import ScatterPlotTest from '@/components/ScatterPlotTest'

@@ -19,6 +19,7 @@ interface PieData {
 interface PieChartProps {
   width?: number;
   height?: number;
+  startDate?: Date;
 }
 
 const testData: PieData[] = [
@@ -37,14 +38,14 @@ const getApproximatePercentage = (tir: number) => {
 }
 
 
-const PieChart: React.FC<PieChartProps> = ({ width = screenWidth / 3 - 40, height = screenWidth / 3 - 40 }) => {
+const PieChart: React.FC<PieChartProps> = ({ width = screenWidth / 3 - 40, height = screenWidth / 3 - 40, startDate = null  }) => {
   const [data, setData] = useState<PieData[]>(testData);
 
   useEffect(() => {
     const fetchData = async () => {
 
-      const responseData = await getStats();
-  
+      const responseData = await getStats(startDate);
+      console.log(responseData)
       const newData: PieData[] = [
         { label: 'High', value: responseData["time in range"].high },
         { label: 'Low', value: responseData["time in range"].low },
