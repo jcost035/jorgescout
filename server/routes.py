@@ -110,12 +110,13 @@ def history_minutes_route(minutes=60):
 @bp.route('/stats', methods=['GET'], defaults={'start_date_str': None})
 @bp.route('/stats/<string:start_date_str>', methods=['GET'])
 def stats(start_date_str):
-    start_date =  datetime.strptime(start_date_str, '%Y-%m-%d') if start_date_str is not None else None
+    start_date =  datetime.strptime(start_date_str, '%Y-%m-%d') if start_date_str is not None else datetime.min
+    print(start_date)
     return jsonify({
         'time in range': get_time_in_range(start_date=start_date), 
-        'average': get_average_glucose(), 
-        'a1c' : get_a1c(), 
-        'standard deviation': get_standard_deviation()
+        'average': get_average_glucose(start_date=start_date), 
+        'a1c' : get_a1c(start_date=start_date), 
+        'standard deviation': get_standard_deviation(start_date=start_date)
     })
 
 @bp.route('/testhigh', methods=['GET'])

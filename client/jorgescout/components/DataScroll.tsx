@@ -34,32 +34,33 @@ export default function DataScroll() {
         <GestureHandlerRootView>
             <ScrollView scrollEnabled={scrollEnabled}>
                 <View style={{flexDirection: "row", justifyContent: "flex-end", paddingRight: 10}}>
-                    <RangePicker setGlobalRange={setRange} ranges={['90','30','1']} units='d' />
+                    <RangePicker setGlobalRange={setRange} ranges={['90','30','1']} units='d' defaultRange='30' />
                 </View>
                 <View style={{ width: windowWidth, flexDirection: "column"}}>
                     <View style={styles.horizontalSeparator} />
                     <View style={{ flexDirection: "row"}}>
-                        <A1cTile/>
+                        <A1cTile startDate={startDate}/>
                         <View style={styles.verticalSeparator} />
-                        <TimeInRangeChart/>
+                        <TimeInRangeChart startDate={startDate}/>
                         <View style={styles.verticalSeparator} />
-                        <AverageGlucoseTile/>
+                        <AverageGlucoseTile startDate={startDate}/>
                     </View>
                     <View style={styles.horizontalSeparator} />
                     <View style={{ flexDirection: "row"}}>
                         <SegmentChart scrollLock={() => {setScrollEnabled(false)}} scrollRelease={() => { setScrollEnabled(true)}}/>
                     </View>
                     <View style={styles.horizontalSeparator} />
-                    <View style={{ flexDirection: "row"}}>
-                        <AgpChart graphHeight={sideLength}/>
+                    <View style={{ flexDirection: "column", alignItems: "center"}}>
+                        <Text style={{fontSize: 18, padding: 2}}>Ambulatory Glucose Profile</Text>
+                        <AgpChart graphHeight={sideLength - 10}/>
                     </View>
                     <View style={styles.horizontalSeparator} />
                     <View style={{ flexDirection: "row"}}>
-                        <StandardDeviationTile/>
+                        <StandardDeviationTile startDate={startDate}/>
                         <View style={styles.verticalSeparator} />
-                        <ConfidenceIntervalTile/>
+                        <ConfidenceIntervalTile startDate={startDate}/>
                         <View style={styles.verticalSeparator} />
-                        <CoefficientofVarianceTile/>
+                        <CoefficientofVarianceTile startDate={startDate}/>
                     </View>
                     <View style={styles.horizontalSeparator} />
                     

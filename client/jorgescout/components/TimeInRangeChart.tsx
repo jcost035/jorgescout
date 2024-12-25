@@ -43,7 +43,7 @@ const PieChart: React.FC<PieChartProps> = ({ width = screenWidth / 3 - 40, heigh
 
   useEffect(() => {
     const fetchData = async () => {
-
+      // console.log(startDate)
       const responseData = await getStats(startDate);
       console.log(responseData)
       const newData: PieData[] = [
@@ -53,11 +53,12 @@ const PieChart: React.FC<PieChartProps> = ({ width = screenWidth / 3 - 40, heigh
       ];
 
       setData(newData);
+      // console.log(startDate)
     }
 
     fetchData();
 
-  }, []);
+  }, [startDate]);
 
   const radius = Math.min(width, height) / 2 - 10;
   const colors = scaleOrdinal(colorPalette);

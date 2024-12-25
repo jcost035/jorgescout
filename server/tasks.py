@@ -93,23 +93,16 @@ def fill_in_gaps(app):
         populate_old_readings(app, gap_end_time)
     gap_end_times.clear()
 
-def get_time_in_range(start_date=None, end_date=datetime.now()):
+def get_time_in_range(start_date=datetime.min, end_date=datetime.now()):
     with current_app.app_context():
-        if start_date is None:
-            query = db.select(func.count()).select_from(Reading)
-        else:
-            query = db.select(func.count()).select_from(Reading).where((func.date(Reading.time) >= start_date.date()) & (func.date(Reading.time) <= end_date.date()))
+        
+        query = db.select(func.count()).select_from(Reading).where((func.date(Reading.time) >= start_date.date()) & (func.date(Reading.time) <= end_date.date()))
         reading_count = db.session.execute(query).scalar_one_or_none() 
     
         if reading_count > 0:
-            if start_date is None:
-                high = db.session.execute(db.select(func.count()).where(Reading.value > 180)).scalar_one()
-                in_range = db.session.execute(db.select(func.count()).where((50 < Reading.value) & (Reading.value < 180))).scalar_one()
-                low = db.session.execute(db.select(func.count()).where(Reading.value < 50)).scalar_one()
-            else:
-                high = db.session.execute(db.select(func.count()).where((Reading.value > 180) & (func.date(Reading.time) >= start_date.date()) & (func.date(Reading.time) <= end_date.date()))).scalar_one()
-                in_range = db.session.execute(db.select(func.count()).where((50 < Reading.value) & (Reading.value < 180) & (func.date(Reading.time) >= start_date.date()) & (func.date(Reading.time) <= end_date.date()))).scalar_one()
-                low = db.session.execute(db.select(func.count()).where((Reading.value < 50) & (func.date(Reading.time) >= start_date.date()) & (func.date(Reading.time) <= end_date.date()))).scalar_one()
+            high = db.session.execute(db.select(func.count()).where((Reading.value > 180) & (func.date(Reading.time) >= start_date.date()) & (func.date(Reading.time) <= end_date.date()))).scalar_one()
+            in_range = db.session.execute(db.select(func.count()).where((50 < Reading.value) & (Reading.value < 180) & (func.date(Reading.time) >= start_date.date()) & (func.date(Reading.time) <= end_date.date()))).scalar_one()
+            low = db.session.execute(db.select(func.count()).where((Reading.value < 50) & (func.date(Reading.time) >= start_date.date()) & (func.date(Reading.time) <= end_date.date()))).scalar_one()
 
 
     
@@ -148,36 +141,36 @@ def populate_daily_time_in_range(app):
 
             current_date += timedelta(days=1)
 
-def get_average_glucose():
+def get_average_glucose(start_date=datetime.min):
     with current_app.app_context():
-        query = db.select(func.count()).select_from(Reading).limit(1)
+        query = db.select(func.count()).select_from(Reading).where(func.date(Reading.time) >= start_date.date()).limit(1)
         reading_count = db.session.execute(query).scalar_one_or_none() 
 
-        query = db.select(Reading).order_by(Reading.time.asc()).limit(1)
+        query = db.select(Reading).where(func.date(Reading.time) >= start_date.date()).order_by(Reading.time.asc()).limit(1)
         start_reading = db.session.execute(query).scalar_one_or_none()
 
-        reading_sum = db.session.execute(db.select(func.sum(Reading.value))).scalar_one()
+        reading_sum = db.session.execute(db.select(func.sum(Reading.value)).where(func.date(Reading.time) >= start_date.date())).scalar_one()
     
     return {
         'average glucose': round(reading_sum / reading_count, 0),
         'range-start-date': str(start_reading.time)
         }
 
-def get_a1c():
-    average_glucose = get_average_glucose()["average glucose"]
+def get_a1c(start_date=datetime.min):
+    average_glucose = get_average_glucose(start_date)["average glucose"]
 
     a1c = (average_glucose + 46.7) / 28.7
 
     return round(a1c, 1)
 
-def get_standard_deviation():
+def get_standard_deviation(start_date=datetime.min):
     average = get_average_glucose()["average glucose"]
 
-    query = db.select(func.count()).select_from(Reading)
+    query = db.select(func.count()).select_from(Reading).where(func.date(Reading.time) >= start_date.date())
     reading_count = db.session.execute(query).scalar_one() 
 
     #with current_app.app_context():
-    query = db.select(Reading)
+    query = db.select(Reading).where(func.date(Reading.time) >= start_date.date())
     readings = db.session.execute(query).scalars()
 
     square_sum = 0

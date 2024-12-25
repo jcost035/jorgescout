@@ -2,8 +2,8 @@ import DeviceInfo from 'react-native-device-info';
 // import { QueryClient, QueryClientProvider, useQuery } from '@tanstack/react-query';
 
 // const queryClient = new QueryClient();
-const ip = '142.93.71.17'
-const home_ip = '127.0.0.1'
+// const ip = '142.93.71.17'
+const ip = '127.0.0.1'
 
 export async function getReading() {
     try {
@@ -41,10 +41,10 @@ export async function getHistory(minutes: number) {
 
 export async function getStats(start_date:Date|null=null) {
   try {
+    console.log(start_date)
     let response:any;
     if (start_date != null) {
-      response = await fetch(`http://${ip}:5001/stats/${start_date.getFullYear()}-${start_date.getMonth()}-${start_date.getDate()}`);
-
+      response = await fetch(`http://${ip}:5001/stats/${start_date.getFullYear()}-${start_date.getMonth() + 1}-${start_date.getDate()}`);
     }
     else
     {
@@ -66,7 +66,7 @@ export async function getStats(start_date:Date|null=null) {
 
 export async function getDailyTimeInRange() {
   try {
-    const response = await fetch(`http://${ip}:5001/getdailytir/30`);
+    const response = await fetch(`http://${ip}:5001/getdailytir/90`);
     
     if (!response.ok) {
       throw new Error(`HTTP error! Status: ${response.status}`);

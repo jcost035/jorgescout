@@ -5,14 +5,19 @@ import { Dimensions, StyleSheet } from 'react-native';
 
 const sideLength = Dimensions.get('screen').width / 3;
 
-export default function A1cTile() {
+interface A1cTileProps {
+    startDate: Date | null;
+}
+
+const  A1cTile: React.FC<A1cTileProps> = ({startDate = null}) => {
     const [a1c, setA1c] = useState<string>("--");
 
     useEffect(() => {
         const fetchData = async () => {
             try {
-                const stats = await getStats();
+                const stats = await getStats(startDate);
                 setA1c(stats.a1c);
+                console.log(stats.a1c)
             }
             catch(error) {
                 console.error(`Error: ${error}`)
@@ -20,7 +25,7 @@ export default function A1cTile() {
         }
 
         fetchData();
-    }, []);
+    }, [startDate]);
 
     return (
         <View style={styles.tile}>
@@ -49,3 +54,5 @@ const styles = StyleSheet.create({
         fontSize: 20,
     }
 });
+
+export default A1cTile;

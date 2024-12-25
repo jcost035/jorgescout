@@ -7,12 +7,21 @@ interface RangePickerProps {
     setGlobalRange: (range: string) => void;
     ranges: string[];
     units: string;
+    defaultRange?: string;
   }
 
-const RangePicker: React.FC<RangePickerProps> = ({ setGlobalRange, ranges, units }) => {
+const RangePicker: React.FC<RangePickerProps> = ({ setGlobalRange, ranges, units, defaultRange='' }) => {
 
     //const ranges = ['24', '12', '4'];
-    const [currentRange, setCurrentRange] = useState(ranges[ranges.length - 1]);
+    const initialRange = ranges.indexOf(defaultRange) != -1 ? defaultRange : ranges[ranges.length - 1];
+    const [currentRange, setCurrentRange] = useState(initialRange);
+
+    // useEffect(() => {
+    //     if (ranges.indexOf(defaultRange) != -1) {
+    //         setCurrentRange(defaultRange);
+    //         setGlobalRange(defaultRange);
+    //     }
+    // }, [])
 
     useEffect(() => {
         setGlobalRange(currentRange);

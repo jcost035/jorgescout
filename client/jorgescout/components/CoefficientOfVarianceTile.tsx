@@ -3,7 +3,7 @@ import { View, Text } from './Themed';
 import { getStats } from '@/scripts/scripts.ts';
 import {Dimensions, StyleSheet } from 'react-native';
 
-export default function CoefficientofVarianceTile() {
+export default function CoefficientofVarianceTile({startDate=null}:{startDate: Date|null}) {
 
     const screenWidth = Dimensions.get('screen').width;
     const sideLength = screenWidth / 3;
@@ -13,7 +13,7 @@ export default function CoefficientofVarianceTile() {
     useEffect(() => {
         const fetchData = async () => {
             try{
-                const data = await getStats();
+                const data = await getStats(startDate);
 
                 const coefficient = Math.round((data["standard deviation"] / data["average"]["average glucose"]) * 100)
 
@@ -25,7 +25,7 @@ export default function CoefficientofVarianceTile() {
         }
 
         fetchData();
-    }, []);
+    }, [startDate]);
 
 
     return (

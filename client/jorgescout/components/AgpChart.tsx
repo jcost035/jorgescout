@@ -36,10 +36,7 @@ export default function AgpChart({graphHeight = 250}) {
         const fetchData = async () => {
             const response = await getAgpData();
             const midLineDataSet:DataPoint[] = [];
-            
-            //const firstTime = new Date(response.history[response.history.length - 1].TimeString);
-            // const startTime = new Date(new Date().getTime() - FOUR_HOURS);
-            //history_data.push({x:startTime, y: -1000});
+    
             let i = 0
             response.map((item:any) => {
                 if(i % 4 == 0) {
@@ -57,10 +54,6 @@ export default function AgpChart({graphHeight = 250}) {
                 i++;
             
             });
-            
-            // const lastTime = new Date(response.history[0].TimeString);
-            // const endTime = new Date(lastTime.getTime() + FIVE_MINUTES);
-            //history_data.push({x:endTime, y: -1000});
 
             setMidLineData(midLineDataSet);
         }
@@ -94,7 +87,7 @@ export default function AgpChart({graphHeight = 250}) {
         .range([0, chartWidth]);
 
     const yExtent = d3.extent(midLineData, (d) => d.y) as [number, number];
-    const yAxisHeight = yExtent[1] > 250 ? yExtent[1] : DEFAULT_YAXIS;
+    const yAxisHeight = (yExtent[1] > 250 ? yExtent[1] : DEFAULT_YAXIS);
     const yScale = d3
         .scaleLinear()
         .domain([0, yAxisHeight])
@@ -115,26 +108,6 @@ export default function AgpChart({graphHeight = 250}) {
         .y(d => yScale(d.y))
         .curve(d3.curveBasis)(midLineData);
 
-    const lowerQuartileCurve = d3.line<DataPoint>()
-        .x(d => xScale(new Date(d.x)))
-        .y(d => yScale(d.yLow))
-        .curve(d3.curveBasis)(midLineData);
-
-    const upperQuartileCurve = d3.line<DataPoint>()
-        .x(d => xScale(new Date(d.x)))
-        .y(d => yScale(d.yHigh))
-        .curve(d3.curveBasis)(midLineData);
-
-    const lowerOutliersCurve = d3.line<DataPoint>()
-        .x(d => xScale(new Date(d.x)))
-        .y(d => yScale(d.yVeryLow))
-        .curve(d3.curveBasis)(midLineData);
-
-    const upperOutliersCurve = d3.line<DataPoint>()
-        .x(d => xScale(new Date(d.x)))
-        .y(d => yScale(d.yVeryHigh))
-        .curve(d3.curveBasis)(midLineData);
-
     const quartileArea = d3.area<DataPoint>()
         .x(d => xScale(d.x))
         .y0(d => yScale(d.yLow))
@@ -150,12 +123,10 @@ export default function AgpChart({graphHeight = 250}) {
         .y0(d => yScale(d.yReallySmall))
         .y1(d => yScale(d.yReallyBig))
 
-    const [activePoint, setActivePoint] = useState<Date | null>(null);
-
     return (
         <View style={{}}>
 
-            <Svg width={width} height={height} >
+            <Svg width={width} height={chartHeight} >
                 {/* Chart group */}
                 <G translateX={margin.left} translateY={margin.top}>
                     {/* Median, upper/lower quartiles and shading between them */}
@@ -163,10 +134,7 @@ export default function AgpChart({graphHeight = 250}) {
                     <Path d={outlierArea(midLineData)!} fill="steelblue" opacity={0.2} />
                     <Path d={quartileArea(midLineData)!} fill="steelblue" opacity={0.5} />
                     <Path d={medianCurve!} strokeWidth="3" stroke="black" fill="none"/>
-                    {/* <Path d={upperQuartileCurve!} strokeWidth="2" stroke="blue" fill="none"/>
-                    <Path d={lowerQuartileCurve!} strokeWidth="2" stroke="blue" fill="none"/> */}
-                    {/* <Path d={upperOutliersCurve!} strokeWidth="2" stroke="blue" fill="none"/>
-                    <Path d={lowerOutliersCurve!} strokeWidth="2" stroke="blue" fill="none"/> */}
+          
                     
                     {/* X-Axis */}
                     <Line
@@ -176,7 +144,7 @@ export default function AgpChart({graphHeight = 250}) {
                         y2={chartHeight}
                         stroke="#e3e3e3"
                     />
-                    <Line x1={0} y1={yScale(yAxisHeight)} x2={chartWidth} y2={yScale(yAxisHeight)} stroke="#e3e3e3" />
+                    {/* <Line x1={0} y1={yScale(yAxisHeight)} x2={chartWidth} y2={yScale(yAxisHeight)} stroke="#e3e3e3" /> */}
 
                     {tickValues.map((tick, index) => {
                         const x = xScale(tick);
