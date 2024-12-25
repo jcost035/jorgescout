@@ -102,6 +102,7 @@ export default function AgpChart({graphHeight = 250}) {
 
     const RANGE_FLOOR = 70
     const RANGE_CEILING = 180
+    const TARGET = 110
 
     const medianCurve = d3.line<DataPoint>()
         .x(d => xScale(new Date(d.x)))
@@ -139,9 +140,9 @@ export default function AgpChart({graphHeight = 250}) {
                     {/* X-Axis */}
                     <Line
                         x1={0}
-                        y1={chartHeight}
+                        y1={chartHeight -25}
                         x2={chartWidth}
-                        y2={chartHeight}
+                        y2={chartHeight -25}
                         stroke="#e3e3e3"
                     />
                     {/* <Line x1={0} y1={yScale(yAxisHeight)} x2={chartWidth} y2={yScale(yAxisHeight)} stroke="#e3e3e3" /> */}
@@ -150,10 +151,10 @@ export default function AgpChart({graphHeight = 250}) {
                         const x = xScale(tick);
                         return (
                         <G key={index} translateX={x} translateY={chartHeight}>
-                            {/* <Line x1={0} y1={0} x2={0} y2={-1 * chartHeight} stroke="#e3e3e3" /> */}
+                            <Line x1={0} y1={-25} x2={0} y2={-20} stroke="#e3e3e3" />
                             <SvgText
                             x={0}
-                            y={15}
+                            y={-10}
                             fontSize={10}
                             textAnchor="middle"
                             fill="black"
@@ -164,36 +165,23 @@ export default function AgpChart({graphHeight = 250}) {
                         );
                     })}
 
-                    {/* Floor & ceiling */}
-                    <Line x1={0} y1={yScale(RANGE_CEILING)} x2={chartWidth} y2={yScale(RANGE_CEILING)} stroke="orange"/>
-                    <Line x1={0} y1={yScale(RANGE_FLOOR)} x2={chartWidth} y2={yScale(RANGE_FLOOR)} stroke="red"/>
 
                     {/* Y-Axis */}
                     <Line x1={0} y1={0} x2={0} y2={chartHeight} stroke="#e3e3e3" />
                     <Line x1={chartWidth} y1={0} x2={chartWidth} y2={chartHeight} stroke="#e3e3e3" />
-                    {yScale.ticks(3).map((tick, index) => {
-                        const y = yScale(tick);
-                        return (
-                        <G key={index} translateX={-5} translateY={y}>
-                            <Line x1={5} y1={0} x2={chartWidth + 5} y2={0} stroke="#e3e3e3" />
-                            <SvgText
-                            x={chartWidth + 10}
-                            y={4}
-                            fontSize={10}
-                            textAnchor="start"
-                            fill="black"
-                            >
-                            {tick}
-                            </SvgText>
-                        </G>
-                        );
-                    })}
-
                     
+                    {/* Floor & ceiling */}
+                    <Line x1={0} y1={yScale(RANGE_CEILING)} x2={chartWidth} y2={yScale(RANGE_CEILING)} stroke="orange"/>
+                    <SvgText x={chartWidth + 2} y={yScale(RANGE_CEILING) + 4} textAnchor="start" fill="">{RANGE_CEILING}</SvgText>
+                    
+                    <Line strokeDasharray="6, 4" x1={0} y1={yScale(TARGET)} x2={chartWidth} y2={yScale(TARGET)} stroke="green"/>
+                    {/* <SvgText x={chartWidth + 2} y={yScale(TARGET) + 4} textAnchor="start" fill="">{TARGET}</SvgText> */}
+
+                    <Line x1={0} y1={yScale(RANGE_FLOOR)} x2={chartWidth} y2={yScale(RANGE_FLOOR)} stroke="red"/>
+                    <SvgText x={chartWidth + 3} y={yScale(RANGE_FLOOR) + 4} textAnchor="start" fill="">{RANGE_FLOOR}</SvgText>
+
                 </G>
             </Svg>
-
-            <View style={styles.horizontalSeparator}></View>
 
         </View>
     );

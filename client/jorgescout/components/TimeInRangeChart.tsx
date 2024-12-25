@@ -43,9 +43,8 @@ const PieChart: React.FC<PieChartProps> = ({ width = screenWidth / 3 - 40, heigh
 
   useEffect(() => {
     const fetchData = async () => {
-      // console.log(startDate)
       const responseData = await getStats(startDate);
-      console.log(responseData)
+      
       const newData: PieData[] = [
         { label: 'High', value: responseData["time in range"].high },
         { label: 'Low', value: responseData["time in range"].low },
@@ -53,7 +52,6 @@ const PieChart: React.FC<PieChartProps> = ({ width = screenWidth / 3 - 40, heigh
       ];
 
       setData(newData);
-      // console.log(startDate)
     }
 
     fetchData();

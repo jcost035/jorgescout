@@ -17,7 +17,6 @@ const  A1cTile: React.FC<A1cTileProps> = ({startDate = null}) => {
             try {
                 const stats = await getStats(startDate);
                 setA1c(stats.a1c);
-                console.log(stats.a1c)
             }
             catch(error) {
                 console.error(`Error: ${error}`)

@@ -52,7 +52,7 @@ export default function DataScroll() {
                     <View style={styles.horizontalSeparator} />
                     <View style={{ flexDirection: "column", alignItems: "center"}}>
                         <Text style={{fontSize: 18, padding: 2}}>Ambulatory Glucose Profile</Text>
-                        <AgpChart graphHeight={sideLength - 10}/>
+                        <AgpChart graphHeight={sideLength}/>
                     </View>
                     <View style={styles.horizontalSeparator} />
                     <View style={{ flexDirection: "row"}}>
