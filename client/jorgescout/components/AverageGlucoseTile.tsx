@@ -6,7 +6,9 @@ import {Dimensions, StyleSheet } from 'react-native';
 export default function AverageGlucoseTile({startDate=null}:{startDate:Date|null}) {
 
     const screenWidth = Dimensions.get('screen').width;
-    const sideLength = screenWidth / 3;
+    const height = screenWidth / 4;
+    const width = screenWidth / 4;
+
 
     const [avgGlucose, setAvgGlucose] = useState<string>("--");
 
@@ -26,9 +28,9 @@ export default function AverageGlucoseTile({startDate=null}:{startDate:Date|null
 
 
     return (
-        <View style={{width: sideLength, height: sideLength, justifyContent: "center", alignItems: "center"}}>
+        <View style={{width: width, height: height, justifyContent: "center", alignItems: "center"}}>
             <Text>Average{"\n"}Glucose</Text>
-            <Text style={{fontSize: 40}}>{avgGlucose}</Text>
+            <Text style={{fontSize: 27}}>{avgGlucose}</Text>
         </View>
     );
 }

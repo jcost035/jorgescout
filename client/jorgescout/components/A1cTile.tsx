@@ -3,7 +3,8 @@ import { View, Text } from './Themed';
 import { getStats } from '@/scripts/scripts.ts';
 import { Dimensions, StyleSheet } from 'react-native';
 
-const sideLength = Dimensions.get('screen').width / 3;
+const height = Dimensions.get('screen').width / 4;
+const width = Dimensions.get('screen').width / 4;
 
 interface A1cTileProps {
     startDate: Date | null;
@@ -38,8 +39,8 @@ const  A1cTile: React.FC<A1cTileProps> = ({startDate = null}) => {
 
 const styles = StyleSheet.create({
     tile: {
-        height: sideLength, 
-        width: sideLength, 
+        height: height, 
+        width: width, 
         justifyContent: "center",
         alignItems: "center",
         backgroundColor: "",
@@ -47,10 +48,10 @@ const styles = StyleSheet.create({
 
     },
     reading: {
-        fontSize: 40,  
+        fontSize: 27,  
     },
     title: {
-        fontSize: 20,
+        fontSize: 15,
     }
 });
 

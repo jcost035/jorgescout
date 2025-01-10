@@ -145,7 +145,6 @@ export default function AgpChart({graphHeight = 250}) {
                         y2={chartHeight -25}
                         stroke="#e3e3e3"
                     />
-                    {/* <Line x1={0} y1={yScale(yAxisHeight)} x2={chartWidth} y2={yScale(yAxisHeight)} stroke="#e3e3e3" /> */}
 
                     {tickValues.map((tick, index) => {
                         const x = xScale(tick);
@@ -167,18 +166,17 @@ export default function AgpChart({graphHeight = 250}) {
 
 
                     {/* Y-Axis */}
-                    <Line x1={0} y1={0} x2={0} y2={chartHeight} stroke="#e3e3e3" />
-                    <Line x1={chartWidth} y1={0} x2={chartWidth} y2={chartHeight} stroke="#e3e3e3" />
+                    <Line x1={0} y1={0} x2={0} y2={chartHeight - 25} stroke="#e3e3e3" />
+                    <Line x1={chartWidth} y1={0} x2={chartWidth} y2={chartHeight - 25} stroke="#e3e3e3" />
                     
                     {/* Floor & ceiling */}
                     <Line x1={0} y1={yScale(RANGE_CEILING)} x2={chartWidth} y2={yScale(RANGE_CEILING)} stroke="orange"/>
-                    <SvgText x={chartWidth + 2} y={yScale(RANGE_CEILING) + 4} textAnchor="start" fill="">{RANGE_CEILING}</SvgText>
+                    <SvgText x={chartWidth + 4} y={yScale(RANGE_CEILING) + 4} textAnchor="start" fill="">{RANGE_CEILING}</SvgText>
                     
                     <Line strokeDasharray="6, 4" x1={0} y1={yScale(TARGET)} x2={chartWidth} y2={yScale(TARGET)} stroke="green"/>
-                    {/* <SvgText x={chartWidth + 2} y={yScale(TARGET) + 4} textAnchor="start" fill="">{TARGET}</SvgText> */}
 
                     <Line x1={0} y1={yScale(RANGE_FLOOR)} x2={chartWidth} y2={yScale(RANGE_FLOOR)} stroke="red"/>
-                    <SvgText x={chartWidth + 3} y={yScale(RANGE_FLOOR) + 4} textAnchor="start" fill="">{RANGE_FLOOR}</SvgText>
+                    <SvgText x={chartWidth + 5} y={yScale(RANGE_FLOOR) + 4} textAnchor="start" fill="">{RANGE_FLOOR}</SvgText>
 
                 </G>
             </Svg>

@@ -38,13 +38,13 @@ const getApproximatePercentage = (tir: number) => {
 }
 
 
-const PieChart: React.FC<PieChartProps> = ({ width = screenWidth / 3 - 40, height = screenWidth / 3 - 40, startDate = null  }) => {
+const PieChart: React.FC<PieChartProps> = ({ width = screenWidth / 3, height = screenWidth / 3, startDate = null  }) => {
   const [data, setData] = useState<PieData[]>(testData);
 
   useEffect(() => {
     const fetchData = async () => {
       const responseData = await getStats(startDate);
-      
+
       const newData: PieData[] = [
         { label: 'High', value: responseData["time in range"].high },
         { label: 'Low', value: responseData["time in range"].low },
@@ -58,7 +58,18 @@ const PieChart: React.FC<PieChartProps> = ({ width = screenWidth / 3 - 40, heigh
 
   }, [startDate]);
 
-  const radius = Math.min(width, height) / 2 - 10;
+  const styles = StyleSheet.create({
+    container: {
+      justifyContent: 'flex-start',
+      alignItems: 'center',
+      padding: 1,
+      width: width,
+      height: height
+    },
+  });
+  const chartWidth = width * 0.4;
+  const chartHeight = height * 0.4;
+  const radius = Math.min(chartWidth, chartHeight) / 2 - 10;
   const colors = scaleOrdinal(colorPalette);
 
   // Generate pie slices
@@ -67,16 +78,16 @@ const PieChart: React.FC<PieChartProps> = ({ width = screenWidth / 3 - 40, heigh
     .sort(null);
 
   const arcGenerator = arc<any>()
-    .innerRadius(20) // inner radius creates hollow center
+    .innerRadius(chartHeight * 0.55) // inner radius creates hollow center
     .outerRadius(radius);
 
   const pieData = pieGenerator(data);
 
   return (
     <View style={styles.container}>
-      <Text style={{fontSize: 15, paddingTop: 5}}>Time in Range</Text>
-      <Svg width={width} height={height}>
-        <G x={width / 2} y={height / 2}>
+      <Text style={{fontSize: 12, paddingTop: 5}}>Time in Range</Text>
+      <Svg width={width * 0.6} height={height * 0.6}>
+        <G x={width * 0.3} y={height * 0.3 }>
           {pieData.map((slice: PieArcDatum<PieData>, index: number) => (
             <G key={index}>
               {/* Render the pie slice */}
@@ -84,35 +95,17 @@ const PieChart: React.FC<PieChartProps> = ({ width = screenWidth / 3 - 40, heigh
                 d={arcGenerator(slice) as string}
                 fill={colors(index.toString()) as string}
               />
-              {/* Add text label */}
-              {/* <SvgText
-                x={arcGenerator.centroid(slice)[0]}
-                y={(arcGenerator.centroid(slice)[1])}
-                fontSize={8}
-                fill="black"
-                textAnchor="middle"
-              >
-                {slice.data.value} %
-              </SvgText> */}
             </G>
           ))}
         </G>
       </Svg>
       <View style={{flexDirection: "row", paddingBottom: 1}}>
-        <Text style={{color: "red"}}>{getApproximatePercentage(data[1].value)}</Text><Text style={{color: "green"}}>{ getApproximatePercentage(data[2].value) }</Text><Text style={{color: "orange"}}>{ getApproximatePercentage(data[0].value) }</Text>
+        <Text style={{color: "red", fontSize: 12}}>{getApproximatePercentage(data[1].value)}</Text><Text style={{color: "green", fontSize: 12}}>{ getApproximatePercentage(data[2].value) }</Text><Text style={{color: "orange", fontSize: 12}}>{ getApproximatePercentage(data[0].value) }</Text>
       </View>
     </View>
   );
 };
 
-const styles = StyleSheet.create({
-  container: {
-    justifyContent: 'center',
-    alignItems: 'center',
-    padding: 1,
-    width: sideLength,
-    height: sideLength
-  },
-});
+
 
 export default PieChart;

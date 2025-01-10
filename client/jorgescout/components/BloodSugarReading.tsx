@@ -2,6 +2,7 @@ import React, {useEffect, useState} from 'react';
 import { StyleSheet } from 'react-native';
 import { getReading } from '@/scripts/scripts.ts';
 import { Text, View } from './Themed';
+import YutaniGradients from './style/YutaniGradients';
 
 
 
@@ -34,8 +35,11 @@ export default function BloodSugarReading() {
     }, []); // Empty dependency array ensures this runs only once when the component mounts
 
     return (
-        <View>
-            <Text style={[styles.largeReading, {color: readingColor}]}>
+        <View style={{backgroundColor: "transparent"}}>
+            <View style={{height: 0}}>
+                <YutaniGradients/>
+            </View>
+            <Text style={[styles.largeReading, {color: readingColor, filter: "url(#blur)"}]}>
                 {reading}
             </Text>
         </View>
@@ -46,7 +50,9 @@ export default function BloodSugarReading() {
 const styles = StyleSheet.create({
     largeReading: {
         fontSize: 60,
-        fontWeight: 'bold'
+        fontFamily: "TecoSans",
+        fontWeight: "light",
+        filter: "url(#blur)"
     }
 });
 

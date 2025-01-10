@@ -41,9 +41,10 @@ export default function DataScroll() {
                     <View style={{ flexDirection: "row"}}>
                         <A1cTile startDate={startDate}/>
                         <View style={styles.verticalSeparator} />
-                        <TimeInRangeChart startDate={startDate}/>
+                        <TimeInRangeChart startDate={startDate} height={windowWidth / 4} width={windowWidth / 4}/>
                         <View style={styles.verticalSeparator} />
                         <AverageGlucoseTile startDate={startDate}/>
+                        <View style={styles.verticalSeparator} />
                     </View>
                     <View style={styles.horizontalSeparator} />
                     <View style={{ flexDirection: "row"}}>

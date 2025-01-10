@@ -1,10 +1,11 @@
 import React, {useState, useEffect} from "react";
 import { View, StyleSheet, Dimensions, PanResponder } from "react-native";
-import Svg, { Circle, G, Line, Text as SvgText, Rect, TSpan } from "react-native-svg";
+import Svg, { Circle, G, Line, Text as SvgText, Rect, TSpan, Defs, LinearGradient, Stop, RadialGradient } from "react-native-svg";
 import * as d3 from "d3";
 import { getHistory } from '@/scripts/scripts.ts';
 import RangePicker from "./RangePicker";
-
+import YutaniGradients from "./style/YutaniGradients";
+import TecoSans from "@/assets/fonts/tecosans.ttf";
 
 // Define the data structure
 interface DataPoint {
@@ -127,14 +128,37 @@ export default function ScatterPlot() {
         }
     });
 
+    const Tick = React.memo( ({index, tick}:{index:number, tick:Date}) => {
+        const x = xScale(tick);
+        return (
+            <G key={index} translateX={x} translateY={chartHeight}>
+                <Line x1={0} y1={0} x2={0} y2={-1 * chartHeight} stroke="url(#greenGradientY)" strokeWidth={7} />
+                {/* <Line x1={0} y1={0} x2={0} y2={-1 * chartHeight} stroke="#6cc592" strokeWidth={2} /> */}
+                <SvgText
+                    x={0}
+                    y={15}
+                    fontSize={13}
+                    textAnchor="middle"
+                    fill="#86d4a7"
+                    fontFamily="TecoSans"
+                    // filter="url(#blur)"
+                    fontWeight={4}
+                >
+                {d3.timeFormat("%-I %p")(tick)}
+                </SvgText>
+            </G>
+        )
+    });
+
     return (
-        <View style={{}}>
+        <View style={{backgroundColor: "#161b21"}}>
 
             <View style={{flexDirection: "row", justifyContent: "flex-end", paddingRight: 10}}>
                 <RangePicker setGlobalRange={setPlotRange} ranges={['24','12','4']} units='h' />
             </View>
 
             <Svg width={width} height={height} {...panResponder.panHandlers}>
+                <YutaniGradients/>
                 {/* Chart group */}
                 <G translateX={margin.left} translateY={margin.top}>
                     {/* X-Axis */}
@@ -148,39 +172,45 @@ export default function ScatterPlot() {
                     {tickValues.map((tick, index) => {
                         const x = xScale(tick);
                         return (
-                        <G key={index} translateX={x} translateY={chartHeight}>
-                            <Line x1={0} y1={0} x2={0} y2={-1 * chartHeight} stroke="#e3e3e3" />
-                            <SvgText
-                            x={0}
-                            y={15}
-                            fontSize={10}
-                            textAnchor="middle"
-                            fill="black"
-                            >
-                            {d3.timeFormat("%-I %p")(tick)}
-                            </SvgText>
-                        </G>
+                            <G key={index} translateX={x} translateY={chartHeight}>
+                                <Line x1={0} y1={0} x2={0} y2={-1 * chartHeight} stroke="url(#greenGradientY)" strokeWidth={7} />
+                                {/* <Line x1={0} y1={0} x2={0} y2={-1 * chartHeight} stroke="#6cc592" strokeWidth={2} /> */}
+                                <SvgText
+                                    x={0}
+                                    y={15}
+                                    fontSize={13}
+                                    textAnchor="middle"
+                                    fill="#86d4a7"
+                                    fontFamily="TecoSans"
+                                    // filter="url(#blur)"
+                                    fontWeight={4}
+                                >
+                                {d3.timeFormat("%-I %p")(tick)}
+                                </SvgText>
+                            </G>
                         );
                     })}
 
                     {/* Floor & ceiling */}
-                    <Line x1={0} y1={yScale(RANGE_CEILING)} x2={chartWidth} y2={yScale(RANGE_CEILING)} stroke="orange"/>
-                    <Line x1={0} y1={yScale(RANGE_FLOOR)} x2={chartWidth} y2={yScale(RANGE_FLOOR)} stroke="red"/>
+                    {/* <Line x1={0} y1={yScale(RANGE_CEILING)} x2={chartWidth} y2={yScale(RANGE_CEILING)} stroke="orange"/>
+                    <Line x1={0} y1={yScale(RANGE_FLOOR)} x2={chartWidth} y2={yScale(RANGE_FLOOR)} stroke="red" strokeWidth={1}/> */}
 
                     {/* Y-Axis */}
-                    <Line x1={0} y1={0} x2={0} y2={chartHeight} stroke="#e3e3e3" />
-                    <Line x1={chartWidth} y1={0} x2={chartWidth} y2={chartHeight} stroke="#e3e3e3" />
+                    <Line x1={0} y1={0} x2={0} y2={chartHeight} stroke="url(#greenGradientY)" strokeWidth={5} />
+                    <Line x1={chartWidth} y1={0} x2={chartWidth} y2={chartHeight} stroke="url(#greenGradientY)"  strokeWidth={5}/>
                     {yScale.ticks(5).map((tick, index) => {
                         const y = yScale(tick);
                         return (
                         <G key={index} translateX={-5} translateY={y}>
-                            <Line x1={5} y1={0} x2={chartWidth + 5} y2={0} stroke="#e3e3e3" />
+                            <Line x1={5} y1={0} x2={chartWidth + 5} y2={0} stroke="url(#greenGradientX)" strokeWidth={5} />
                             <SvgText
-                            x={chartWidth + 10}
-                            y={4}
-                            fontSize={10}
-                            textAnchor="start"
-                            fill="black"
+                                x={chartWidth + 15}
+                                y={5}
+                                fontSize={17}
+                                textAnchor="start"
+                                fill="#86d4a7"
+                                fontFamily="TecoSans"
+                                filter="url(#blur)"
                             >
                             {tick}
                             </SvgText>
@@ -188,12 +218,22 @@ export default function ScatterPlot() {
                         );
                     })}
 
-                    {/* Point highlighting on touch */}
+                    {/* {tickValues.map((tick, index) => {
+                        const x = xScale(tick);
+                        return (
+                        <G key={index} translateX={x} translateY={chartHeight}>
+                            <Line x1={0} y1={0} x2={0} y2={-1 * chartHeight} stroke="#6cc592" strokeWidth={2} />                            
+                        </G>
+                        );
+                    })} */}
+
+                    {/* Point crosshair on touch */}
                     <Line 
                         x1={activePoint != null ? xScale(activePoint!) : -100} 
                         y1={0} x2={activePoint != null ? xScale(activePoint!) : -100} 
                         y2={chartHeight} 
                         stroke={data.find((item) => activePoint === item.x)!?.y < 70 ?"red" : data.find((item) => activePoint === item.x)!?.y > 180 ?  "orange" : "green"}
+                        strokeWidth={5}
                     />
                     <Line 
                         x1={0} 
@@ -201,28 +241,9 @@ export default function ScatterPlot() {
                         x2={chartWidth} 
                         y2={activePoint != null ? yScale(data.find((item) => activePoint === item.x)!?.y) : -1000} 
                         stroke={data.find((item) => activePoint === item.x)!?.y < 70 ?"red" : data.find((item) => activePoint === item.x)!?.y > 180 ?  "orange" : "green"} 
+                        strokeWidth={5}
                     />
 
-                    <Rect 
-                        x={activePoint != null ? xScale(activePoint) : -1000} 
-                        y={-18}
-                        height={50} 
-                        width={70} 
-                        fill={activePoint != null ? "lightgray" : "none"}
-                        rx={10}
-                        stroke={ data.find((item) => activePoint === item.x)!?.y >= 180 ? "orange" : data.find((item) => activePoint === item.x)!?.y < 70 ? "red" : "green"}
-                        strokeWidth={3}
-                        opacity={.5}
-                    />
-                    <SvgText
-                        x={activePoint != null ? xScale(data.find((item) => activePoint === item.x)!.x) : 0}
-                        y={5}
-                        fill="black"
-                        fontSize={20}
-                    >
-                        <TSpan>{data.find((item) => activePoint === item.x)?.y.toString()}</TSpan>
-                        {/* <TSpan x={x(data.find((item) => activeElement === item.date)!.date)! - 30} dy={15}>TIR: {data.find((item) => activeElement === item.date)?.tir}%</TSpan> */}
-                    </SvgText>
 
                     {/* Data points */}
                     {data.map((point, index) => {
@@ -233,11 +254,42 @@ export default function ScatterPlot() {
                             key={index}
                             cx={cx}
                             cy={cy}
-                            r={point.y < 0 ? 0 : 2.1}
-                            fill={point.y < 70 ? "red" : point.y > 180 ? "#FF8C00" : "black" }
+                            r={point.y < 0 ? 0 : 4}
+                            fill={/*point.y < 70 ? "red" : point.y > 180 ? "#FF8C00" :*/ "url(#yellowRadialGradient)" }
                         />
                         );
                     })}
+
+                    {/* crosshair labels */}
+                    <Rect
+                        x={0}
+                        y={data.find((item) => activePoint === item.x)!?.y != null ? yScale(data.find((item) => activePoint === item.x)!?.y) : -1000}
+                        height={15}
+                        width={25}
+                        fill={"green"}
+                    />
+                    <SvgText
+                        x={0}
+                        y={data.find((item) => activePoint === item.x)!?.y != null ? yScale(data.find((item) => activePoint === item.x)!?.y) + 10 : -1000}
+                        fill={"white"}
+                    >
+                        <TSpan>{data.find((item) => activePoint === item.x)?.y.toString()}</TSpan>
+                    </SvgText>
+
+                    <Rect
+                        x={activePoint != null ? xScale(activePoint!) : -1000}
+                        y={chartHeight - 15}
+                        height={15}
+                        width={35}
+                        fill={"green"}
+                    />
+                    <SvgText
+                        x={activePoint != null ? xScale(activePoint!) : -1000}
+                        y={chartHeight - 5}
+                        fill={"white"}
+                    >
+                        <TSpan>{(activePoint?.getHours()! % 12) + ":" + activePoint?.getMinutes()}</TSpan>
+                    </SvgText>
                 </G>
             </Svg>
 
