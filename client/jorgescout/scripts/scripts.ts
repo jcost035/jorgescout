@@ -43,7 +43,8 @@ export async function getStats(start_date:Date|null=null) {
   try {
     let response:any;
     if (start_date != null) {
-      response = await fetch(`http://${ip}:5001/stats/${start_date.getFullYear()}-${start_date.getMonth() + 1}-${start_date.getDate()}`);
+      const start_date_st = `http://${ip}:5001/stats/${start_date.getFullYear()}-${start_date.getMonth() + 1}-${start_date.getDate()}`
+      response = await fetch(start_date_st);
     }
     else
     {
