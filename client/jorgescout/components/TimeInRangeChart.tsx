@@ -20,6 +20,7 @@ interface PieChartProps {
   width?: number;
   height?: number;
   startDate?: Date;
+  stats?: any;
 }
 
 const testData: PieData[] = [
@@ -38,30 +39,21 @@ const getApproximatePercentage = (tir: number) => {
 }
 
 
-const PieChart: React.FC<PieChartProps> = ({ width = screenWidth / 3 - 40, height = screenWidth / 3 - 40, startDate = null  }) => {
+const PieChart: React.FC<PieChartProps> = ({ width = screenWidth / 3 - 40, height = screenWidth / 3 - 40, startDate = null, stats = null  }) => {
   const [data, setData] = useState<PieData[]>(testData);
-
   useEffect(() => {
-    const fetchData = async () => {
-      try {
-        const responseData = await getStats(startDate);
-        console.log(startDate)
-        const newData: PieData[] = [
-          { label: 'High', value: responseData["time in range"].high },
-          { label: 'Low', value: responseData["time in range"].low },
-          { label: 'In Range', value: responseData["time in range"]["in-range"]}
-        ];
-
-        setData(newData);
-      }
-      catch(error) {
-        console.error(`Error: ${error}`)
-      }
+    if (stats != null){
+      const responseData = stats;
+      const newData: PieData[] = [
+            { label: 'High', value: responseData["time in range"].high },
+            { label: 'Low', value: responseData["time in range"].low },
+            { label: 'In Range', value: responseData["time in range"]["in-range"]}
+          ];
+      setData(newData);
     }
 
-    fetchData();
 
-  }, [startDate]);
+  }, [stats]);
 
   const radius = Math.min(width, height) / 2 - 10;
   const colors = scaleOrdinal(colorPalette);

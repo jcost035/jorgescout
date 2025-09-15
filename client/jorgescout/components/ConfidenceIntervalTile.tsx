@@ -6,26 +6,18 @@ import {Dimensions, StyleSheet } from 'react-native';
 const screenWidth = Dimensions.get('screen').width
 const sideLength = screenWidth / 3
 
-export default function ConfidenceIntervalTile({startDate=null}:{startDate: Date|null}) {
+export default function ConfidenceIntervalTile({startDate=null, stats=null}:{startDate: Date|null, stats: any}) {
     const [data, setData] = useState<string[]>(["--", "--"]);
 
     useEffect(() => {
-        const fetchData = async () => {
-            try {
-                const response = await getStats(startDate);
-
-                const ciFloor = response["average"]["average glucose"] - response["standard deviation"];
-                const ciCeiling = response["average"]["average glucose"] + response["standard deviation"];
-                setData([ciFloor.toString(), ciCeiling.toString()]);
-            }
-            catch(error) {
-                console.error(`Error: ${error}`)
-            }
+        if (stats != null) 
+        {
+            const ciFloor = stats["average"]["average glucose"] - stats["standard deviation"];
+            const ciCeiling = stats["average"]["average glucose"] + stats["standard deviation"];
+            setData([ciFloor.toString(), ciCeiling.toString()]);
         }
 
-        fetchData();
-
-    }, [startDate])
+    }, [stats])
 
     return (
         <View style={{width: sideLength, height: sideLength,  alignItems: "center"}}>

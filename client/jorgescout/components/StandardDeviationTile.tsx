@@ -3,7 +3,7 @@ import { View, Text } from './Themed';
 import { getStats } from '@/scripts/scripts.ts';
 import {Dimensions, StyleSheet } from 'react-native';
 
-export default function StandardDeviationTile({startDate=null}:{startDate: Date|null}) {
+export default function StandardDeviationTile({startDate=null, stats=null}:{startDate: Date|null, stats: any}) {
 
     const screenWidth = Dimensions.get('screen').width;
     const sideLength = screenWidth / 3;
@@ -11,18 +11,11 @@ export default function StandardDeviationTile({startDate=null}:{startDate: Date|
     const [stdDeviation, setStdDeviation] = useState<string>("--");
 
     useEffect(() => {
-        const fetchData = async () => {
-            try{
-                const data = await getStats(startDate);
-                setStdDeviation(data["standard deviation"]);
-            }
-            catch(error) {
-                console.log(error, `Error: ${error}`)
-            }
+        if (stats != null)
+        {
+            setStdDeviation(stats["standard deviation"])
         }
-
-        fetchData();
-    }, [startDate]);
+    }, [stats]);
 
 
     return (

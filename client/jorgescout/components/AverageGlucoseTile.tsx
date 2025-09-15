@@ -3,7 +3,7 @@ import { View, Text } from './Themed';
 import { getStats } from '@/scripts/scripts.ts';
 import {Dimensions, StyleSheet } from 'react-native';
 
-export default function AverageGlucoseTile({startDate=null}:{startDate:Date|null}) {
+export default function AverageGlucoseTile({startDate=null, stats=null}:{startDate:Date|null, stats:any}) {
 
     const screenWidth = Dimensions.get('screen').width;
     const sideLength = screenWidth / 3;
@@ -11,18 +11,11 @@ export default function AverageGlucoseTile({startDate=null}:{startDate:Date|null
     const [avgGlucose, setAvgGlucose] = useState<string>("--");
 
     useEffect(() => {
-        const fetchData = async () => {
-            try{
-                const data = await getStats(startDate);
-                setAvgGlucose(data["average"]["average glucose"]);
-            }
-            catch(error) {
-                console.log(error, `Error: ${error}`)
-            }
+        if (stats != null)
+        {
+            setAvgGlucose(stats["average"]["average glucose"]);
         }
-
-        fetchData();
-    }, [startDate]);
+    }, [stats]);
 
 
     return (

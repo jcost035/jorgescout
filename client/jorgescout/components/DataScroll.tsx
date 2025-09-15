@@ -12,7 +12,7 @@ import CoefficientofVarianceTile from './CoefficientOfVarianceTile';
 import ConfidenceIntervalTile from './ConfidenceIntervalTile';
 import RangePicker from './RangePicker';
 import AgpChart from './AgpChart'
-
+import { getStats } from '@/scripts/scripts.ts';
 
 export default function DataScroll() {
     
@@ -30,6 +30,22 @@ export default function DataScroll() {
         setStartDate(rangeStart);
     }
 
+    const [stats, setStats] = useState();
+
+    useEffect(() => {
+            const fetchData = async () => {
+                try {
+                    const stats = await getStats(startDate);
+                    setStats(stats);
+                }
+                catch(error) {
+                    console.error(`Error: ${error}`);
+                }
+            }
+    
+            fetchData();
+        }, [startDate]);
+
     return (
         <GestureHandlerRootView>
             <ScrollView scrollEnabled={scrollEnabled}>
@@ -39,11 +55,11 @@ export default function DataScroll() {
                 <View style={{ width: windowWidth, flexDirection: "column"}}>
                     <View style={styles.horizontalSeparator} />
                     <View style={{ flexDirection: "row"}}>
-                        <A1cTile startDate={startDate}/>
+                        <A1cTile startDate={startDate} stats={stats}/>
                         <View style={styles.verticalSeparator} />
-                        <TimeInRangeChart startDate={startDate}/>
+                        <TimeInRangeChart startDate={startDate} stats={stats}/>
                         <View style={styles.verticalSeparator} />
-                        <AverageGlucoseTile startDate={startDate}/>
+                        <AverageGlucoseTile startDate={startDate} stats={stats}/>
                     </View>
                     <View style={styles.horizontalSeparator} />
                     <View style={{ flexDirection: "row"}}>
@@ -56,11 +72,11 @@ export default function DataScroll() {
                     </View>
                     <View style={styles.horizontalSeparator} />
                     <View style={{ flexDirection: "row"}}>
-                        <StandardDeviationTile startDate={startDate}/>
+                        <StandardDeviationTile startDate={startDate} stats={stats}/>
                         <View style={styles.verticalSeparator} />
-                        <ConfidenceIntervalTile startDate={startDate}/>
+                        <ConfidenceIntervalTile startDate={startDate} stats={stats}/>
                         <View style={styles.verticalSeparator} />
-                        <CoefficientofVarianceTile startDate={startDate}/>
+                        <CoefficientofVarianceTile startDate={startDate} stats={stats}/>
                     </View>
                     <View style={styles.horizontalSeparator} />
                     

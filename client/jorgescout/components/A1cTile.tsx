@@ -7,24 +7,18 @@ const sideLength = Dimensions.get('screen').width / 3;
 
 interface A1cTileProps {
     startDate: Date | null;
+    stats: any;
 }
 
-const  A1cTile: React.FC<A1cTileProps> = ({startDate = null}) => {
+const  A1cTile: React.FC<A1cTileProps> = ({startDate = null, stats = null}) => {
     const [a1c, setA1c] = useState<string>("--");
-
+    
     useEffect(() => {
-        const fetchData = async () => {
-            try {
-                const stats = await getStats(startDate);
-                setA1c(stats.a1c);
-            }
-            catch(error) {
-                console.error(`Error: ${error}`)
-            }
+        if (stats != null){
+            setA1c(stats.a1c)
         }
+    }, [stats])
 
-        fetchData();
-    }, [startDate]);
 
     return (
         <View style={styles.tile}>
