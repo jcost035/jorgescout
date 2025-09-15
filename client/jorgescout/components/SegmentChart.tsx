@@ -50,24 +50,29 @@ export default function segmentChart(props: SegmentChartProps) {
 
         useEffect(() => {
             const fetchData = async () => {
-                const response = await getDailyTimeInRange();
+                try {
+                    const response = await getDailyTimeInRange();
 
-                const tirData:SegmentData[] = [];
+                    const tirData:SegmentData[] = [];
 
-                response.map((item: { timeInRange: number, date: string }, index: number) => {
-                    const date = new Date(item.date);
-                    const dateString = date.getMonth() + 1 + "/" + date.getDate();
+                    response.map((item: { timeInRange: number, date: string }, index: number) => {
+                        const date = new Date(item.date);
+                        const dateString = date.getMonth() + 1 + "/" + date.getDate();
 
-                    tirData.push({ 
-                        tir: item.timeInRange, 
-                        day: index.toString(), 
-                        color: getSegmentColor(item.timeInRange) ,
-                        date: dateString
+                        tirData.push({ 
+                            tir: item.timeInRange, 
+                            day: index.toString(), 
+                            color: getSegmentColor(item.timeInRange) ,
+                            date: dateString
+                        });
                     });
-                });
-                
-                
-                setData(tirData.reverse());
+                    
+                    
+                    setData(tirData.reverse());
+                }
+                catch(error) {
+                    console.error(`Error: ${error}`)
+                }
             }
             
             fetchData();

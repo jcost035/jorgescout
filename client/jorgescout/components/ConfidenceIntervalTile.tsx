@@ -11,11 +11,16 @@ export default function ConfidenceIntervalTile({startDate=null}:{startDate: Date
 
     useEffect(() => {
         const fetchData = async () => {
-            const response = await getStats(startDate);
+            try {
+                const response = await getStats(startDate);
 
-            const ciFloor = response["average"]["average glucose"] - response["standard deviation"];
-            const ciCeiling = response["average"]["average glucose"] + response["standard deviation"];
-            setData([ciFloor.toString(), ciCeiling.toString()]);
+                const ciFloor = response["average"]["average glucose"] - response["standard deviation"];
+                const ciCeiling = response["average"]["average glucose"] + response["standard deviation"];
+                setData([ciFloor.toString(), ciCeiling.toString()]);
+            }
+            catch(error) {
+                console.error(`Error: ${error}`)
+            }
         }
 
         fetchData();

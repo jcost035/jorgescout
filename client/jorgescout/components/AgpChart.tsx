@@ -34,28 +34,33 @@ export default function AgpChart({graphHeight = 250}) {
 
     useEffect(() => {
         const fetchData = async () => {
-            const response = await getAgpData();
-            const midLineDataSet:DataPoint[] = [];
-    
-            let i = 0
-            response.map((item:any) => {
-                if(i % 4 == 0) {
-                    midLineDataSet.push({
-                        x: new Date(item["time"]), 
-                        y: item["quartiles"][1], 
-                        yLow: item["quartiles"][0], 
-                        yHigh: item["quartiles"][2],
-                        yVeryLow: item["outliers"][1],
-                        yVeryHigh: item["outliers"][17],
-                        yReallySmall: item["outliers"][0],
-                        yReallyBig: item["outliers"][18]
-                    })
-                };
-                i++;
-            
-            });
+            try {
+                const response = await getAgpData();
+                const midLineDataSet:DataPoint[] = [];
+        
+                let i = 0
+                response.map((item:any) => {
+                    if(i % 4 == 0) {
+                        midLineDataSet.push({
+                            x: new Date(item["time"]), 
+                            y: item["quartiles"][1], 
+                            yLow: item["quartiles"][0], 
+                            yHigh: item["quartiles"][2],
+                            yVeryLow: item["outliers"][1],
+                            yVeryHigh: item["outliers"][17],
+                            yReallySmall: item["outliers"][0],
+                            yReallyBig: item["outliers"][18]
+                        })
+                    };
+                    i++;
+                
+                });
 
-            setMidLineData(midLineDataSet);
+                setMidLineData(midLineDataSet);
+            }
+            catch(error) {
+                console.error(`Error: ${error}`)
+            }
         }
 
         fetchData();

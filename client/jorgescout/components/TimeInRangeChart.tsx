@@ -43,15 +43,20 @@ const PieChart: React.FC<PieChartProps> = ({ width = screenWidth / 3 - 40, heigh
 
   useEffect(() => {
     const fetchData = async () => {
-      const responseData = await getStats(startDate);
-      
-      const newData: PieData[] = [
-        { label: 'High', value: responseData["time in range"].high },
-        { label: 'Low', value: responseData["time in range"].low },
-        { label: 'In Range', value: responseData["time in range"]["in-range"]}
-      ];
+      try {
+        const responseData = await getStats(startDate);
+        console.log(startDate)
+        const newData: PieData[] = [
+          { label: 'High', value: responseData["time in range"].high },
+          { label: 'Low', value: responseData["time in range"].low },
+          { label: 'In Range', value: responseData["time in range"]["in-range"]}
+        ];
 
-      setData(newData);
+        setData(newData);
+      }
+      catch(error) {
+        console.error(`Error: ${error}`)
+      }
     }
 
     fetchData();

@@ -24,20 +24,25 @@ export default function ScatterPlot() {
 
     useEffect(() => {
         const fetchData = async () => {
-            const response = await getHistory(scatterPlotRange);
-            const history_data:DataPoint[] = [];
-            
-            //const firstTime = new Date(response.history[response.history.length - 1].TimeString);
-            const startTime = new Date(new Date().getTime() - FOUR_HOURS);
-            history_data.push({x:startTime, y: -1000});
-            
-            response.history.map((item:{ TimeString: string, Value: number}) => history_data.push({x: new Date(item.TimeString), y: item.Value}));
-            
-            const lastTime = new Date(response.history[0].TimeString);
-            const endTime = new Date(lastTime.getTime() + FIVE_MINUTES);
-            history_data.push({x:endTime, y: -1000});
+            try {
+                const response = await getHistory(scatterPlotRange);
+                const history_data:DataPoint[] = [];
+                
+                //const firstTime = new Date(response.history[response.history.length - 1].TimeString);
+                const startTime = new Date(new Date().getTime() - FOUR_HOURS);
+                history_data.push({x:startTime, y: -1000});
+                
+                response.history.map((item:{ TimeString: string, Value: number}) => history_data.push({x: new Date(item.TimeString), y: item.Value}));
+                
+                const lastTime = new Date(response.history[0].TimeString);
+                const endTime = new Date(lastTime.getTime() + FIVE_MINUTES);
+                history_data.push({x:endTime, y: -1000});
 
-            setData(history_data);
+                setData(history_data);
+            }
+            catch(error) {
+                console.error(`Error: ${error}`)
+            }
         }
 
         fetchData();
