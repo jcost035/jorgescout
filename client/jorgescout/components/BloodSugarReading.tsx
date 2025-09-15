@@ -16,12 +16,18 @@ export default function BloodSugarReading() {
                 const data = await getReading();
                 setReading(data.value + " " + data.trendArrow);
 
-                const color = data.value == "Loading..." || data.value == "---" ? 'black' : Number(data.value) < 70 ? 'red' : Number(data.value) > 180 ? 'orange' : 'lawngreen';
+                const color = 
+                    data.value == 'Loading...' || data.value == '---' ? 'black'
+                    : data.value == 'Error' || Number(data.value) < 70 ? 'red'
+                    : Number(data.value) > 180 ? 'orange'
+                    : 'lawngreen';
+
                 setReadingColor(color)
             }
             catch(error) {
                 console.error("Error: ", error);
                 setReading("Error");
+                setReadingColor('red');
             }
         };
          

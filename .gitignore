@@ -36,3 +36,5 @@ client/.env*.local
 
 # typescript
 client/*.tsbuildinfo
+
+server/__pycache__

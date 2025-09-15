@@ -1,7 +1,6 @@
 import { StyleSheet } from 'react-native';
 
 import { Text, View } from '@/components/Themed';
-import { CartesianChart, Scatter } from 'victory-native';
 import AgpChart from '@/components/AgpChart';
 
 
