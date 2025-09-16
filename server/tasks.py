@@ -103,8 +103,6 @@ def get_time_in_range(start_date=datetime.min, end_date=datetime.now()):
             high = db.session.execute(db.select(func.count()).where((Reading.value > 180) & (func.date(Reading.time) >= start_date.date()) & (func.date(Reading.time) <= end_date.date()))).scalar_one()
             in_range = db.session.execute(db.select(func.count()).where((50 < Reading.value) & (Reading.value < 180) & (func.date(Reading.time) >= start_date.date()) & (func.date(Reading.time) <= end_date.date()))).scalar_one()
             low = db.session.execute(db.select(func.count()).where((Reading.value < 50) & (func.date(Reading.time) >= start_date.date()) & (func.date(Reading.time) <= end_date.date()))).scalar_one()
-
-
     
             return {
                 'in-range': round(in_range / reading_count * 100),

@@ -38,3 +38,4 @@ client/.env*.local
 client/*.tsbuildinfo
 
 server/__pycache__
+node_modules
