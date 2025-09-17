@@ -107,7 +107,7 @@ def history_minutes_route(minutes=60):
     })
 
     
-@bp.route('/stats', methods=['GET'], defaults={'start_date_str': None})
+@bp.route('/stats', methods=['GET'], defaults={'start_date_str': None}) #shouldnt the default be datetime.min?
 @bp.route('/stats/<string:start_date_str>', methods=['GET'])
 def stats(start_date_str):
     start_date =  datetime.strptime(start_date_str, '%Y-%m-%d') if start_date_str is not None else datetime.min

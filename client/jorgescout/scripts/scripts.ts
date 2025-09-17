@@ -2,8 +2,8 @@ import DeviceInfo from 'react-native-device-info';
 // import { QueryClient, QueryClientProvider, useQuery } from '@tanstack/react-query';
 
 // const queryClient = new QueryClient();
+const home_ip = 'localhost'
 const ip = '142.93.71.17'
-const home_ip = '127.0.0.1'
 
 export async function getReading() {
     try {

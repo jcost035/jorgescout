@@ -1,5 +1,5 @@
 import React, {useEffect, useState} from 'react';
-import { StyleSheet, Dimensions } from 'react-native';
+import { StyleSheet, Dimensions, Switch } from 'react-native';
 import { getReading } from '@/scripts/scripts.ts';
 import { Text, View } from './Themed';
 import { GestureHandlerRootView, ScrollView } from 'react-native-gesture-handler';
@@ -13,9 +13,11 @@ import ConfidenceIntervalTile from './ConfidenceIntervalTile';
 import RangePicker from './RangePicker';
 import AgpChart from './AgpChart'
 import { getStats } from '@/scripts/scripts.ts';
+import Sortable from "react-native-sortables";
+import Animated, { useAnimatedRef } from 'react-native-reanimated';
 
 export default function DataScroll() {
-    
+    const scrollableRef = useAnimatedRef<Animated.ScrollView>();
     
     const windowWidth = Dimensions.get('screen').width;
     const sideLength = windowWidth / 3;
@@ -33,55 +35,52 @@ export default function DataScroll() {
     const [stats, setStats] = useState();
 
     useEffect(() => {
-            const fetchData = async () => {
-                try {
-                    const stats = await getStats(startDate);
-                    setStats(stats);
-                }
-                catch(error) {
-                    console.error(`Error: ${error}`);
-                }
+        const fetchData = async () => {
+            try {
+                const stats = await getStats(startDate);
+                setStats(stats);
             }
-    
-            fetchData();
-        }, [startDate]);
+            catch(error) {
+                console.error(`Error: ${error}`);
+            }
+        }
+
+        fetchData();
+    }, [startDate]);
+
+    const [moveableTiles, setMoveableTiles] = useState(false);
 
     return (
         <GestureHandlerRootView>
-            <ScrollView scrollEnabled={scrollEnabled}>
-                <View style={{flexDirection: "row", justifyContent: "flex-end", paddingRight: 10}}>
+            <Animated.ScrollView scrollEnabled={scrollEnabled} ref={scrollableRef}>
+                <View style={{flexDirection: "row", justifyContent: "space-between", paddingRight: 10}}>
+                    <Switch value={moveableTiles} onValueChange={setMoveableTiles} style={{paddingTop: 3}} />
                     <RangePicker setGlobalRange={setRange} ranges={['90','30','1']} units='d' defaultRange='30' />
                 </View>
                 <View style={{ width: windowWidth, flexDirection: "column"}}>
                     <View style={styles.horizontalSeparator} />
-                    <View style={{ flexDirection: "row"}}>
+                    <Sortable.Flex scrollableRef={scrollableRef} sortEnabled={moveableTiles} strategy='insert'>
                         <A1cTile startDate={startDate} stats={stats}/>
-                        <View style={styles.verticalSeparator} />
                         <TimeInRangeChart startDate={startDate} stats={stats}/>
-                        <View style={styles.verticalSeparator} />
                         <AverageGlucoseTile startDate={startDate} stats={stats}/>
-                    </View>
-                    <View style={styles.horizontalSeparator} />
-                    <View style={{ flexDirection: "row"}}>
-                        <SegmentChart scrollLock={() => {setScrollEnabled(false)}} scrollRelease={() => { setScrollEnabled(true)}}/>
-                    </View>
-                    <View style={styles.horizontalSeparator} />
-                    <View style={{ flexDirection: "column", alignItems: "center"}}>
-                        <Text style={{fontSize: 18, padding: 2}}>Ambulatory Glucose Profile</Text>
-                        <AgpChart graphHeight={sideLength}/>
-                    </View>
-                    <View style={styles.horizontalSeparator} />
-                    <View style={{ flexDirection: "row"}}>
+                        <View style={{ flexDirection: "row"}}>
+                            <SegmentChart scrollLock={() => {setScrollEnabled(false)}} scrollRelease={() => { setScrollEnabled(true)}}/>
+                        </View>
+                        <View style={{ flexDirection: "column", alignItems: "center"}}>
+                            <Text style={{fontSize: 18, padding: 2}}>Ambulatory Glucose Profile</Text>
+                            <AgpChart graphHeight={sideLength}/>
+                        </View>
                         <StandardDeviationTile startDate={startDate} stats={stats}/>
-                        <View style={styles.verticalSeparator} />
                         <ConfidenceIntervalTile startDate={startDate} stats={stats}/>
-                        <View style={styles.verticalSeparator} />
                         <CoefficientofVarianceTile startDate={startDate} stats={stats}/>
+                    </Sortable.Flex>
+                    <View style={{ flexDirection: "row"}}>
+                        <View style={styles.verticalSeparator} />
+                        <View style={styles.verticalSeparator} />
                     </View>
                     <View style={styles.horizontalSeparator} />
-                    
                 </View>
-            </ScrollView>
+            </Animated.ScrollView>
         </GestureHandlerRootView>
     );
     
