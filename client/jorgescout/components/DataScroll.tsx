@@ -32,6 +32,23 @@ export default function DataScroll() {
         setStartDate(rangeStart);
     }
 
+    
+    const keep = console.log.bind(console);
+
+    const isSpam = (args: unknown[]) => {
+    try {
+        const s = args.map(a => (typeof a === 'string' ? a : JSON.stringify(a))).join(' ');
+        return s.startsWith('??? ') && /{.*"x":\s*[\d.-]+.*"y":\s*[\d.-]+.*}/.test(s);
+    } catch (e) {
+        return false;
+    }
+    };
+
+    console.log = (...args: any[]) => {
+    if (isSpam(args)) return;   
+    keep(...args);
+    };
+
     const [stats, setStats] = useState();
 
     useEffect(() => {
