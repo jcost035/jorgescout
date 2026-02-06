@@ -4,36 +4,49 @@ from flask import Flask
 from .extensions import db, scheduler
 from .routes import register_routes
 from .config import Config
-from .tasks import take_reading, fill_in_gaps, populate_daily_time_in_range, get_ambulatory_glucose_profile_data
+from .tasks import take_reading, populate_daily_time_in_range
 from flask_migrate import Migrate
 from flask_cors import CORS 
-from datetime import datetime
 
-# Load environment variables from .env file
 load_dotenv()
+
+def _init_scheduler(app):
+    scheduler.add_job(
+        func=lambda: take_reading(app),
+        trigger="interval",
+        minutes=5,
+        id="take_reading"
+    )
+    
+    scheduler.add_job(
+        func=lambda: populate_daily_time_in_range(app),
+        trigger="cron",
+        hour=0,
+        minute=10,
+        id="populate_daily_tir"
+    )
 
 def create_app():
     app = Flask(__name__)
     app.config.from_object(Config)
 
-    CORS(app) #specify resources parameter in production
+    CORS(app)
     
     db.init_app(app)
     scheduler.init_app(app)
-
+    
     Migrate(app, db)
-
-    scheduler.add_job(func=lambda:take_reading(app), trigger="interval", minutes=5, id="take_reading")
-    #scheduler.add_job(func=lambda:fill_in_gaps(app), trigger="interval", minutes=24, id="fill_in_gaps")
-    scheduler.add_job(func=lambda:populate_daily_time_in_range(app), trigger='cron', hour=0, minute=10, id="populate daily tir")
-
-    populate_daily_time_in_range(app)
-
-    scheduler.start()
+    
+    _init_scheduler(app)
 
     with app.app_context():
         db.create_all()
+        populate_daily_time_in_range(app)
 
     register_routes(app)
+    
+    if not scheduler.running:
+        scheduler.start()
 
     return app
+
