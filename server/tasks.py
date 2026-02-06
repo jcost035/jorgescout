@@ -4,6 +4,25 @@ from datetime import datetime, timezone, timedelta
 from flask import current_app
 from .extensions import db, dexcom
 from .models import Reading, dailyTimeInRange
+from .constants import (
+    DEXCOM_TIMEZONE_OFFSET,
+    MIN_GAP_THRESHOLD,
+    SIGNIFICANT_GAP_THRESHOLD,
+    HIGH_GLUCOSE_THRESHOLD,
+    LOW_GLUCOSE_THRESHOLD,
+    IN_RANGE_FLOOR,
+    IN_RANGE_CEILING,
+    A1C_NUMERATOR_CONSTANT,
+    A1C_DENOMINATOR_CONSTANT,
+    AGP_INTERVALS_PER_DAY,
+    AGP_LOWER_QUARTILE,
+    AGP_MEDIAN,
+    AGP_UPPER_QUARTILE,
+    AGP_VERY_LOW_INDEX,
+    AGP_VERY_HIGH_INDEX,
+    AGP_CRITICAL_LOW_INDEX,
+    AGP_CRITICAL_HIGH_INDEX,
+)
 from math import sqrt
 import statistics
 
@@ -42,13 +61,13 @@ def populate_old_readings(app, gap_end_time=datetime.now()):
     with app.app_context():
         gap_start_time = db.session.execute(query).scalar().time
 
-    gap_end_time = gap_end_time.replace(tzinfo=timezone(timedelta(days=-1, seconds=68400)))
-    gap_start_time = gap_start_time.replace(tzinfo=timezone(timedelta(days=-1, seconds=68400)))
+    gap_end_time = gap_end_time.replace(tzinfo=DEXCOM_TIMEZONE_OFFSET)
+    gap_start_time = gap_start_time.replace(tzinfo=DEXCOM_TIMEZONE_OFFSET)
 
     gap_length = gap_end_time - gap_start_time
 
     gap_length_minutes = gap_length.total_seconds() / 60
-    if gap_length_minutes < 10:
+    if gap_length_minutes < MIN_GAP_THRESHOLD:
         return
 
     readings = dexcom.get_glucose_readings()
@@ -78,13 +97,13 @@ def check_for_gaps(app, new_latest_reading):
             query = db.select(Reading).order_by(Reading.time.desc()).limit(1)
             latest_reading = db.session.execute(query).scalar_one_or_none()
 
-    latest_reading.time = latest_reading.time.replace(tzinfo=timezone(timedelta(days=-1, seconds=68400)))
-    new_latest_reading.time = new_latest_reading.time.replace(tzinfo=timezone(timedelta(days=-1, seconds=68400)))
+    latest_reading.time = latest_reading.time.replace(tzinfo=DEXCOM_TIMEZONE_OFFSET)
+    new_latest_reading.time = new_latest_reading.time.replace(tzinfo=DEXCOM_TIMEZONE_OFFSET)
 
     if latest_reading is not None:
         gap_length = new_latest_reading.time - latest_reading.time
         gap_length_minutes = gap_length.total_seconds() / 60
-        if gap_length_minutes > 15:
+        if gap_length_minutes > SIGNIFICANT_GAP_THRESHOLD:
             gap_end_times.append(new_latest_reading.time)
             populate_old_readings(app, new_latest_reading.time)
 
@@ -100,9 +119,9 @@ def get_time_in_range(start_date=datetime.min, end_date=datetime.now()):
         reading_count = db.session.execute(query).scalar_one_or_none() 
     
         if reading_count > 0:
-            high = db.session.execute(db.select(func.count()).where((Reading.value > 180) & (func.date(Reading.time) >= start_date.date()) & (func.date(Reading.time) <= end_date.date()))).scalar_one()
-            in_range = db.session.execute(db.select(func.count()).where((50 < Reading.value) & (Reading.value < 180) & (func.date(Reading.time) >= start_date.date()) & (func.date(Reading.time) <= end_date.date()))).scalar_one()
-            low = db.session.execute(db.select(func.count()).where((Reading.value < 50) & (func.date(Reading.time) >= start_date.date()) & (func.date(Reading.time) <= end_date.date()))).scalar_one()
+            high = db.session.execute(db.select(func.count()).where((Reading.value > HIGH_GLUCOSE_THRESHOLD) & (func.date(Reading.time) >= start_date.date()) & (func.date(Reading.time) <= end_date.date()))).scalar_one()
+            in_range = db.session.execute(db.select(func.count()).where((IN_RANGE_FLOOR < Reading.value) & (Reading.value < IN_RANGE_CEILING) & (func.date(Reading.time) >= start_date.date()) & (func.date(Reading.time) <= end_date.date()))).scalar_one()
+            low = db.session.execute(db.select(func.count()).where((Reading.value < LOW_GLUCOSE_THRESHOLD) & (func.date(Reading.time) >= start_date.date()) & (func.date(Reading.time) <= end_date.date()))).scalar_one()
     
             return {
                 'in-range': round(in_range / reading_count * 100),
@@ -157,7 +176,7 @@ def get_average_glucose(start_date=datetime.min):
 def get_a1c(start_date=datetime.min):
     average_glucose = get_average_glucose(start_date)["average glucose"]
 
-    a1c = (average_glucose + 46.7) / 28.7
+    a1c = (average_glucose + A1C_NUMERATOR_CONSTANT) / A1C_DENOMINATOR_CONSTANT
 
     return round(a1c, 1)
 
@@ -189,8 +208,8 @@ def get_ambulatory_glucose_profile_data(start_date):
         agp_data_list = []
 
         with current_app.app_context():
-            for _ in range(288): #288 5 min periods in 24 hours (we end up w/ 287 bc of weird compairson of 11:55 < reading time < 12:00 but w/e)
-                query = db.select(Reading).where((current.time() <= cast(Reading.time, Time)) & (cast(Reading.time, Time) < (current + timedelta(minutes=5)).time()) & (start_date < Reading.time))
+            for _ in range(AGP_INTERVALS_PER_DAY):
+                query = db.select(Reading).where((current.time() <= cast(Reading.time, Time)) & (cast(Reading.time, Time) < (current + timedelta(minutes=MINUTES_PER_INTERVAL)).time()) & (start_date < Reading.time))
                 readings_slice = list(map(lambda x: x.value, db.session.execute(query).scalars()))
 
                 if len(readings_slice) > 0: #aforementioned weird comparison causes empty slice
@@ -208,7 +227,7 @@ def get_ambulatory_glucose_profile_data(start_date):
                         "outliers" : outliers
                     })
 
-                current = current + timedelta(minutes=5)
+                current = current + timedelta(minutes=MINUTES_PER_INTERVAL)
             
         return agp_data_list
 

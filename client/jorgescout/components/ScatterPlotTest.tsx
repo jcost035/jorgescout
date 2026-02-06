@@ -3,6 +3,7 @@ import { View, StyleSheet, Dimensions, PanResponder } from "react-native";
 import Svg, { Circle, G, Line, Text as SvgText, Rect, TSpan } from "react-native-svg";
 import * as d3 from "d3";
 import { getHistory } from '@/scripts/scripts.ts';
+import { RANGE_FLOOR, RANGE_CEILING } from '@/constants/BloodSugarThresholds';
 import RangePicker from "./RangePicker";
 
 
@@ -88,8 +89,7 @@ export default function ScatterPlot() {
         setTickValues(d3.timeHour.every(spacing)!.range(xDomain[0], xDomain[1]));
     }, [data])
 
-    const RANGE_FLOOR = 70
-    const RANGE_CEILING = 180
+    // Blood sugar range constants imported from BloodSugarThresholds
 
 
     const setPlotRange = (rangeString:string) => {

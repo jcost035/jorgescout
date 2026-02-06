@@ -1,6 +1,7 @@
 import React, {useEffect, useState} from 'react';
 import { StyleSheet } from 'react-native';
 import { getReading } from '@/scripts/scripts.ts';
+import { RANGE_FLOOR, RANGE_CEILING } from '@/constants/BloodSugarThresholds';
 import { Text, View } from './Themed';
 
 
@@ -18,8 +19,8 @@ export default function BloodSugarReading() {
 
                 const color = 
                     data.value == 'Loading...' || data.value == '---' ? 'black'
-                    : data.value == 'Error' || Number(data.value) < 70 ? 'red'
-                    : Number(data.value) > 180 ? 'orange'
+                    : data.value == 'Error' || Number(data.value) < RANGE_FLOOR ? 'red'
+                    : Number(data.value) > RANGE_CEILING ? 'orange'
                     : 'lawngreen';
 
                 setReadingColor(color)

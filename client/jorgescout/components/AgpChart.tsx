@@ -3,6 +3,7 @@ import { View, StyleSheet, Dimensions, PanResponder } from "react-native";
 import Svg, { Circle, G, Line, Text as SvgText, Rect, TSpan, Path } from "react-native-svg";
 import * as d3 from "d3";
 import { getAgpData, getHistory } from '@/scripts/scripts.ts';
+import { RANGE_FLOOR, RANGE_CEILING, TARGET_GLUCOSE } from '@/constants/BloodSugarThresholds';
 import RangePicker from "./RangePicker";
 
 
@@ -105,9 +106,7 @@ export default function AgpChart({graphHeight = 250}) {
         setTickValues(d3.timeHour.every(spacing)!.range(xDomain[0], xDomain[1]));
     }, [midLineData])
 
-    const RANGE_FLOOR = 70
-    const RANGE_CEILING = 180
-    const TARGET = 110
+    // Blood sugar range constants imported from BloodSugarThresholds
 
     const medianCurve = d3.line<DataPoint>()
         .x(d => xScale(new Date(d.x)))
@@ -179,8 +178,8 @@ export default function AgpChart({graphHeight = 250}) {
                     <Line x1={0} y1={yScale(RANGE_CEILING)} x2={chartWidth} y2={yScale(RANGE_CEILING)} stroke="orange"/>
                     <SvgText x={chartWidth + 2} y={yScale(RANGE_CEILING) + 4} textAnchor="start" fill="">{RANGE_CEILING}</SvgText>
                     
-                    <Line strokeDasharray="6, 4" x1={0} y1={yScale(TARGET)} x2={chartWidth} y2={yScale(TARGET)} stroke="green"/>
-                    {/* <SvgText x={chartWidth + 2} y={yScale(TARGET) + 4} textAnchor="start" fill="">{TARGET}</SvgText> */}
+                    <Line strokeDasharray="6, 4" x1={0} y1={yScale(TARGET_GLUCOSE)} x2={chartWidth} y2={yScale(TARGET_GLUCOSE)} stroke="green"/>
+                    {/* <SvgText x={chartWidth + 2} y={yScale(TARGET_GLUCOSE) + 4} textAnchor="start" fill="">{TARGET_GLUCOSE}</SvgText> */}
 
                     <Line x1={0} y1={yScale(RANGE_FLOOR)} x2={chartWidth} y2={yScale(RANGE_FLOOR)} stroke="red"/>
                     <SvgText x={chartWidth + 3} y={yScale(RANGE_FLOOR) + 4} textAnchor="start" fill="">{RANGE_FLOOR}</SvgText>

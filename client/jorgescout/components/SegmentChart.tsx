@@ -4,6 +4,7 @@ import { Dimensions, View } from 'react-native'
 import { Text, PanResponder } from 'react-native'
 import * as d3 from 'd3'
 import { getDailyTimeInRange } from '@/scripts/scripts';
+import { TIR_CRITICAL_LOW, TIR_LOW, TIR_FAIR, TIR_GOOD, TIR_COLOR_MAP } from '@/constants/BloodSugarThresholds';
 import { test } from 'vitest';
 import * as Haptics from 'expo-haptics';
 
@@ -32,10 +33,10 @@ const colors = {
 }
 
 const getSegmentColor = (tir: number) => {
-    if (tir < 70) { return colors.red }
-    else if (tir < 80) {return colors.yellow }
-    else if (tir < 85) { return colors.lg }
-    else if (tir < 90) { return colors.g }
+    if (tir < TIR_CRITICAL_LOW) { return colors.red }
+    else if (tir < TIR_LOW) {return colors.yellow }
+    else if (tir < TIR_FAIR) { return colors.lg }
+    else if (tir < TIR_GOOD) { return colors.g }
     else {return colors.dg}
 }
 

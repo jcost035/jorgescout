@@ -3,6 +3,7 @@ from pydexcom import Dexcom
 from .models import Reading, dailyTimeInRange
 from .extensions import db
 from .tasks import get_time_in_range, get_average_glucose, get_a1c, get_standard_deviation, get_ambulatory_glucose_profile_data
+from .constants import HIGH_GLUCOSE_THRESHOLD
 from datetime import datetime
 import time
 import json
@@ -122,7 +123,7 @@ def stats(start_date_str):
 @bp.route('/testhigh', methods=['GET'])
 def test_high():
     return jsonify({
-            'latest_reading': 190,
+            'latest_reading': HIGH_GLUCOSE_THRESHOLD + 10,  # Test value slightly above threshold
             'time': datetime.now(),
             'trend_arrow': ''
         })
