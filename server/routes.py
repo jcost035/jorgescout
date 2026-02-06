@@ -12,7 +12,7 @@ bp = Blueprint('api', __name__)
 
 @bp.route('/', methods=['GET'])
 def home():
-    dexcom = Dexcom(username="jorge.costa5633@gmail.com", password="012106J-c")
+    from .extensions import dexcom
     glucose_reading = dexcom.get_current_glucose_reading()
     history = dexcom.get_glucose_readings()
 
@@ -54,7 +54,7 @@ def latest_reading_route():
     
 @bp.route('/history/<int:reading_count>', methods=['GET'])
 def history_route(reading_count=10):
-    dexcom = Dexcom(username="jorge.costa5633@gmail.com", password="012106J-c")
+    from .extensions import dexcom
     history = dexcom.get_glucose_readings(max_count=reading_count)
 
     def to_json(reading):
@@ -81,7 +81,7 @@ def history_route(reading_count=10):
 
 @bp.route('/history/minutes/<int:minutes>', methods=['GET'])
 def history_minutes_route(minutes=60):
-    dexcom = Dexcom(username="jorge.costa5633@gmail.com", password="012106J-c")
+    from .extensions import dexcom
     history = dexcom.get_glucose_readings(minutes=minutes)
 
     def to_json(reading):

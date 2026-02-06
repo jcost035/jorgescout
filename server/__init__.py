@@ -1,3 +1,5 @@
+from dotenv import load_dotenv
+import os
 from flask import Flask
 from .extensions import db, scheduler
 from .routes import register_routes
@@ -6,6 +8,9 @@ from .tasks import take_reading, fill_in_gaps, populate_daily_time_in_range, get
 from flask_migrate import Migrate
 from flask_cors import CORS 
 from datetime import datetime
+
+# Load environment variables from .env file
+load_dotenv()
 
 def create_app():
     app = Flask(__name__)

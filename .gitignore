@@ -33,6 +33,7 @@ client/*.pem
 
 # local env files
 client/.env*.local
+server/.env
 
 # typescript
 client/*.tsbuildinfo
