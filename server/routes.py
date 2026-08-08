@@ -79,6 +79,26 @@ def history_route(reading_count=10):
         'history': history_list
     })
 
+@bp.route('/history/db/<int:reading_count>', methods=['GET'])
+def database_history_route(reading_count=10):
+    query = db.select(Reading).order_by(Reading.time.desc()).limit(reading_count)
+    readings = db.session.execute(query).scalars()
+
+    history_list = [
+        {
+            'Value': reading.value,
+            'TimeString': reading.time.strftime('%Y-%m-%dT%H:%M:%S.%fZ'),
+            'Hour': reading.time.hour,
+            'Minute': reading.time.minute,
+            'TrendArrow': reading.trendArrow,
+        }
+        for reading in readings
+    ]
+
+    return jsonify({
+        'history': history_list
+    })
+
 @bp.route('/history/minutes/<int:minutes>', methods=['GET'])
 def history_minutes_route(minutes=60):
     dexcom = Dexcom(username="jorge.costa5633@gmail.com", password="012106J-c")
@@ -149,5 +169,4 @@ def get_agp(start_date_string):
     
 def register_routes(app):
     app.register_blueprint(bp)
-
 
