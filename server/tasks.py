@@ -113,22 +113,26 @@ def get_time_in_range(start_date=datetime.min, end_date=datetime.now()):
 def populate_daily_time_in_range(app):
 
     with app.app_context():
-        query = db.select(dailyTimeInRange).order_by(dailyTimeInRange.date.asc()).limit(1)
+        query = db.select(dailyTimeInRange).order_by(dailyTimeInRange.date.desc()).limit(1)
         last_tir_recorded = db.session.execute(query).scalar_one_or_none()
 
-        current_date = last_tir_recorded.date if (last_tir_recorded is not None)  else datetime.now()
-
         if last_tir_recorded is not None:
-            current_date = last_tir_recorded.date
+            current_date = last_tir_recorded.date + timedelta(days=1)
         else:
             query = db.select(func.min(Reading.time)).limit(1)
             earliest_reading = db.session.execute(query).scalar_one()
             current_date = earliest_reading
 
+        if current_date is None:
+            return
+
         while(current_date.date() < datetime.now().date()):
             tir =  get_time_in_range(current_date,current_date)
-            if tir is not None:
-                daily_tir = dailyTimeInRange(timeInRange=tir['in-range'], timeHigh=tir['high'], timeLow=tir['low'], date=current_date, date_recorded=datetime.now())
+            if tir is None:
+                current_date += timedelta(days=1)
+                continue
+
+            daily_tir = dailyTimeInRange(timeInRange=tir['in-range'], timeHigh=tir['high'], timeLow=tir['low'], date=current_date, date_recorded=datetime.now())
             
             try:
                 db.session.add(daily_tir) 
@@ -222,5 +226,4 @@ def get_ambulatory_glucose_profile_data(start_date):
 
 
         
-
 
