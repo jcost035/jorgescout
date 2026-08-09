@@ -7,9 +7,6 @@ from .models import Reading, dailyTimeInRange
 from math import sqrt
 import statistics
 
-latest_reading = None
-gap_end_times = []
-
 def take_reading(app):
     try:
         dexcom_reading = dexcom.get_current_glucose_reading()
@@ -33,15 +30,7 @@ def take_reading(app):
             print(f"Exception: {e.orig}")  #Log 
 
 
-def populate_old_readings(app, gap_end_time=datetime.now()):
-
-    query = db.select(Reading).where(
-        Reading.time < gap_end_time, Reading.value is not None
-    ).order_by(Reading.time.desc()).limit(1)
-
-    with app.app_context():
-        gap_start_time = db.session.execute(query).scalar().time
-
+def populate_old_readings(app, gap_start_time, gap_end_time):
     gap_end_time = gap_end_time.replace(tzinfo=timezone(timedelta(days=-1, seconds=68400)))
     gap_start_time = gap_start_time.replace(tzinfo=timezone(timedelta(days=-1, seconds=68400)))
 
@@ -54,7 +43,8 @@ def populate_old_readings(app, gap_end_time=datetime.now()):
     readings = dexcom.get_glucose_readings()
 
     def date_range_filter(reading):
-        return gap_start_time < reading.datetime < gap_end_time
+        reading_time = reading.datetime.replace(tzinfo=timezone(timedelta(days=-1, seconds=68400)))
+        return gap_start_time < reading_time < gap_end_time
         
     filtered_readings = list(filter(date_range_filter, readings))
 
@@ -71,27 +61,19 @@ def populate_old_readings(app, gap_end_time=datetime.now()):
                 print(f"Error: {str(e)}") #log
 
 def check_for_gaps(app, new_latest_reading):
-    global latest_reading
-
     with app.app_context():
-        if latest_reading is None:
-            query = db.select(Reading).order_by(Reading.time.desc()).limit(1)
-            latest_reading = db.session.execute(query).scalar_one_or_none()
+        query = db.select(Reading).order_by(Reading.time.desc()).limit(1)
+        previous_reading = db.session.execute(query).scalar_one_or_none()
 
-    latest_reading.time = latest_reading.time.replace(tzinfo=timezone(timedelta(days=-1, seconds=68400)))
-    new_latest_reading.time = new_latest_reading.time.replace(tzinfo=timezone(timedelta(days=-1, seconds=68400)))
+    if previous_reading is None:
+        return
 
-    if latest_reading is not None:
-        gap_length = new_latest_reading.time - latest_reading.time
-        gap_length_minutes = gap_length.total_seconds() / 60
-        if gap_length_minutes > 15:
-            gap_end_times.append(new_latest_reading.time)
-            populate_old_readings(app, new_latest_reading.time)
+    previous_time = previous_reading.time.replace(tzinfo=timezone(timedelta(days=-1, seconds=68400)))
+    new_time = new_latest_reading.time.replace(tzinfo=timezone(timedelta(days=-1, seconds=68400)))
+    gap_length_minutes = (new_time - previous_time).total_seconds() / 60
 
-def fill_in_gaps(app):
-    for gap_end_time in gap_end_times:
-        populate_old_readings(app, gap_end_time)
-    gap_end_times.clear()
+    if gap_length_minutes > 15:
+        populate_old_readings(app, previous_reading.time, new_latest_reading.time)
 
 def get_time_in_range(start_date=datetime.min, end_date=datetime.now()):
     with current_app.app_context():
@@ -226,4 +208,3 @@ def get_ambulatory_glucose_profile_data(start_date):
 
 
         
-
