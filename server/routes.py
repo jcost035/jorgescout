@@ -1,7 +1,6 @@
 from flask import jsonify, Blueprint, current_app, Response
-from pydexcom import Dexcom
 from .models import Reading, dailyTimeInRange
-from .extensions import db
+from .extensions import db, dexcom
 from .tasks import get_time_in_range, get_average_glucose, get_a1c, get_standard_deviation, get_ambulatory_glucose_profile_data
 from datetime import datetime
 import time
@@ -12,8 +11,6 @@ bp = Blueprint('api', __name__)
 
 @bp.route('/', methods=['GET'])
 def home():
-    dexcom = Dexcom(username="jorge.costa5633@gmail.com", password="012106J-c")
-    glucose_reading = dexcom.get_current_glucose_reading()
     history = dexcom.get_glucose_readings()
 
     #idea: check to make sure latest reading was over 5 mins ago before pinging dexcom servers, if it was under use last reading
@@ -54,7 +51,6 @@ def latest_reading_route():
     
 @bp.route('/history/<int:reading_count>', methods=['GET'])
 def history_route(reading_count=10):
-    dexcom = Dexcom(username="jorge.costa5633@gmail.com", password="012106J-c")
     history = dexcom.get_glucose_readings(max_count=reading_count)
 
     def to_json(reading):
@@ -101,7 +97,6 @@ def database_history_route(reading_count=10):
 
 @bp.route('/history/minutes/<int:minutes>', methods=['GET'])
 def history_minutes_route(minutes=60):
-    dexcom = Dexcom(username="jorge.costa5633@gmail.com", password="012106J-c")
     history = dexcom.get_glucose_readings(minutes=minutes)
 
     def to_json(reading):
@@ -169,4 +164,3 @@ def get_agp(start_date_string):
     
 def register_routes(app):
     app.register_blueprint(bp)
-
